@@ -54,7 +54,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -114,4 +114,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = 'static/' # URL에서 정적 파일 접근 경로
+STATICFILES_DIRS = [BASE_DIR / "static"] # 루트의 공통 static/ 폴더 경로
+
+# collectstatic 실행 시 모을 경로 (배포 시 필요)
+STATIC_ROOT = BASE_DIR / 'staticfiles'
