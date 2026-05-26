@@ -34,7 +34,7 @@
         </section>
 
         <nav class="tab-menu">
-          <a href="#" class="active">공구</a>
+          <a href="{% url 'posts:group_list' %}" class="active">공구</a>
           <a href="#">나눔</a>
         </nav>
 
@@ -117,7 +117,7 @@
         </section>
       </main>
 
-      <a href="{% url 'create' %}" class="floating-btn">＋</a>
+      <a href="{% url 'posts:group_create' %}" class="floating-btn">＋</a>
 
       <nav class="bottom-nav">
         <a href="#">
@@ -125,7 +125,7 @@
           <span>메시지</span>
         </a>
 
-        <a href="#" class="active">
+        <a href="{% url 'posts:group_list' %}" class="active">
           ⌂
           <span>홈</span>
         </a>
