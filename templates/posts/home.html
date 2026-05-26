@@ -22,10 +22,9 @@
 
       <main class="home-page">
         <section class="top-search">
-          <div class="search-box">
-            <input type="text" placeholder="상품 / 공구명 검색" />
-            <button type="button">⌕</button>
-          </div>
+          <form action="{% url 'posts:group_list' %}" method="get" class="search-box" style="width: 100%; display: flex;">
+            <input type="text" name="q" value="{{ query }}" placeholder="상품 / 공구명 검색" />
+            <button type="submit">⌕</button> </form>
           <button class="alarm-btn" type="button">♡</button>
         </section>
 
@@ -43,82 +42,34 @@
         </section>
 
         <section class="post-list">
-          <article class="post-card">
-            <div class="post-image carrot"></div>
+          {% for group in groups %}
+          <article class="post-card" onclick="location.href='{% url 'posts:group_detail' group.id %}'" style="cursor: pointer;">
+            <div class="post-image" style="background-image: url('{{ group.groupImages.first.photo.url }}');"></div>
 
             <div class="post-content">
-              <span class="badge orange">모집중</span>
-              <span class="badge green">야채</span>
+              <span class="badge orange">모집중</span> <span class="badge green">{{ group.category.name }}</span>
 
-              <h2>양배추랑 당근 같이 사요!</h2>
-              <p class="price">4,000원</p>
-              <p class="people">3 / 4명 참여중</p>
+              <h2>{{ group.title }}</h2>
+              <p class="price">{{ group.price_per }}원</p>
+              <p class="people">{{ group.current_members }} / {{ group.min_members }}명 참여중</p>
 
               <div class="progress">
                 <span style="width: 75%"></span>
               </div>
 
               <div class="post-meta">
-                <span>♡ 18:30 마감</span>
-                <span>♙ 태릉입구</span>
+                <span>♡ {{ group.deadline|date:"H:i" }} 마감</span>
+                <span>♙ {{ group.location }}</span>
               </div>
             </div>
-
             <button class="heart-btn" type="button">♡</button>
           </article>
-
-          <article class="post-card">
-            <div class="post-image tissue"></div>
-
-            <div class="post-content">
-              <span class="badge orange">모집중</span>
-              <span class="badge green">생활</span>
-
-              <h2>화장지 30롤 같이 나눠요</h2>
-              <p class="price">6,200원</p>
-              <p class="people">4 / 6명 참여중</p>
-
-              <div class="progress">
-                <span style="width: 66%"></span>
-              </div>
-
-              <div class="post-meta">
-                <span>♡ 19:30 마감</span>
-                <span>♙ 화랑대</span>
-              </div>
-            </div>
-
-            <button class="heart-btn" type="button">♡</button>
-          </article>
-
-          <article class="post-card">
-            <div class="post-image egg"></div>
-
-            <div class="post-content">
-              <span class="badge orange">모집중</span>
-              <span class="badge green">식품</span>
-
-              <h2>무항생제 계란 같이 사요</h2>
-              <p class="price">5,500원</p>
-              <p class="people">3 / 5명 참여중</p>
-
-              <div class="progress">
-                <span style="width: 60%"></span>
-              </div>
-
-              <div class="post-meta">
-                <span>♡ 18:30 마감</span>
-                <span>♙ 태릉입구</span>
-              </div>
-            </div>
-
-            <button class="heart-btn" type="button">♡</button>
-          </article>
+          {% empty %}
+          <p>등록된 공구 게시글이 없습니다.</p>
+          {% endfor %}
         </section>
       </main>
-
       <a href="{% url 'posts:group_create' %}" class="floating-btn">＋</a>
-
       <nav class="bottom-nav">
         <a href="#">
           ♡
