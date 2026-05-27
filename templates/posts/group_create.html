@@ -44,6 +44,10 @@
               </div>
 
               <textarea
+<<<<<<< Updated upstream
+=======
+                name="content"
+>>>>>>> Stashed changes
                 maxlength="100"
                 placeholder="유통기한과 구매수량을 입력해주세요&#10;(필수)"
               ></textarea>
@@ -61,12 +65,33 @@
               <button type="button" class="small-icon-btn">⌕</button>
             </div>
 
+<<<<<<< Updated upstream
             <div class="category-list">
               <button type="button" class="category active">✾ 야채</button>
               <button type="button" class="category">🍎 과일</button>
               <button type="button" class="category">▣ 가구</button>
               <button type="button" class="category">▤ 도서</button>
               <button type="button" class="category">⌂ 의류</button>
+=======
+            <input
+              type="hidden"
+              name="category"
+              id="categoryInput"
+              value="{{ categories.0.pk }}"
+            />
+
+            <div class="category-list">
+              {% for category in categories %}
+              <button
+                type="button"
+                class="category"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
+              >
+                {{ category.name }}
+              </button>
+              {% endfor %}
+>>>>>>> Stashed changes
             </div>
           </section>
 
@@ -84,7 +109,18 @@
               </div>
             </div>
 
+<<<<<<< Updated upstream
             <input type="range" min="2" max="10" value="4" id="peopleRange" />
+=======
+            <input
+              type="range"
+              name="min_members"
+              min="2"
+              max="10"
+              value="4"
+              id="peopleRange"
+            />
+>>>>>>> Stashed changes
           </section>
 
           <section class="form-card info-card">
@@ -109,15 +145,80 @@
             <p>실제 상품 링크를 붙여주세요.</p>
 
             <div class="link-input-box">
+<<<<<<< Updated upstream
               <input type="url" placeholder="https" />
+=======
+              <input type="url" name="link" placeholder="https" />
+>>>>>>> Stashed changes
               <button type="button">링크 붙여넣기</button>
             </div>
+            <!-- input 없는 필드들 hidden으로 추가 (임시) -->
+            <input type="hidden" name="location" value="미정" />
+            <input type="hidden" name="deadline" value="2099-12-31T00:00" />
+            <input type="hidden" name="price_per" value="0" />
           </section>
 
           <button class="submit-btn" type="submit">공구 시작하기</button>
-          <button class="delete-btn" type="button">취소할게요</button>
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% url 'posts:group_list' %}"
+          >
+            취소할게요
+          </button>
         </form>
       </main>
+<<<<<<< Updated upstream
+=======
+
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          {% for category in categories %}
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
+          >
+            <span>{{ category.name }}</span>
+            <strong></strong>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
+>>>>>>> Stashed changes
     </div>
 
     <script src="{% static 'app/js/nona.js' %}"></script>

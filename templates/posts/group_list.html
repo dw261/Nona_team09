@@ -22,14 +22,42 @@
 
       <main class="home-page">
         <section class="top-search">
+<<<<<<< Updated upstream:templates/posts/home.html
           <form action="{% url 'posts:group_list' %}" method="get" class="search-box" style="width: 100%; display: flex;">
             <input type="text" name="q" value="{{ query }}" placeholder="상품 / 공구명 검색" />
             <button type="submit">⌕</button> </form>
+=======
+          <form
+            action="{% url 'posts:group_list' %}"
+            method="get"
+            class="search-box"
+            style="width: 100%; display: flex"
+          >
+          {% csrf_token %}
+            <input
+              type="text"
+              name="q"
+              value="{{ query }}"
+              placeholder="상품 / 공구명 검색"
+            />
+            <button type="submit">⌕</button>
+          </form>
+>>>>>>> Stashed changes:templates/posts/group_list.html
           <button class="alarm-btn" type="button">♡</button>
         </section>
 
         <section class="logo-area">
+<<<<<<< Updated upstream:templates/posts/home.html
           <h1 class="logo-text">nona</h1>
+=======
+          <a href="{% url 'posts:group_list' %}">
+            <img
+              class="logo-img"
+              src="{% static 'app/images/logo.svg' %}"
+              alt="nona"
+            />
+          </a>
+>>>>>>> Stashed changes:templates/posts/group_list.html
         </section>
 
         <nav class="tab-menu">
@@ -47,7 +75,18 @@
             <div class="post-image" style="background-image: url('{{ group.groupImages.first.photo.url }}');"></div>
 
             <div class="post-content">
+<<<<<<< Updated upstream:templates/posts/home.html
               <span class="badge orange">모집중</span> <span class="badge green">{{ group.category.name }}</span>
+=======
+              {% if group.status == 'recruiting' %}
+                <span class="badge orange">모집중</span>
+              {% elif group.status == 'closed' %}
+                <span class="badge orange">마감</span>
+              {% elif group.status == 'done' %}
+                <span class="badge orange">완료</span>
+              {% endif %}
+              <span class="badge green">{{ group.category.name }}</span>
+>>>>>>> Stashed changes:templates/posts/group_list.html
 
               <h2>{{ group.title }}</h2>
               <p class="price">{{ group.price_per }}원</p>
@@ -62,14 +101,19 @@
                 <span>♙ {{ group.location }}</span>
               </div>
             </div>
-            <button class="heart-btn" type="button">♡</button>
+            <button class="heart-btn" type="button"
+                    data-url="{% url 'posts:group_wish_toggle' group.id %}">
+              {% if group.id in wished_ids %}♥{% else %}♡{% endif %}
+            </button>
           </article>
           {% empty %}
           <p>등록된 공구 게시글이 없습니다.</p>
           {% endfor %}
         </section>
       </main>
+      
       <a href="{% url 'posts:group_create' %}" class="floating-btn">＋</a>
+
       <nav class="bottom-nav">
         <a href="#">
           ♡
@@ -92,29 +136,29 @@
       <section class="bottom-sheet" id="sortSheet">
         <h3>정렬 기준</h3>
 
-        <button class="sort-option selected" type="button">
-          <span>◉ 최신순</span>
-          <strong>✓</strong>
+        <button class="sort-option {% if sort == 'latest' %}selected{% endif %}" 
+          type="button" data-sort="latest">
+          <span>◉ 최신순</span><strong>{% if sort == 'latest' %}✓{% endif %}</strong>
         </button>
 
-        <button class="sort-option" type="button">
-          <span>◷ 오래된 순</span>
-          <strong></strong>
+        <button class="sort-option {% if sort == 'oldest' %}selected{% endif %}" 
+                type="button" data-sort="oldest">
+          <span>◷ 오래된 순</span><strong>{% if sort == 'oldest' %}✓{% endif %}</strong>
         </button>
 
-        <button class="sort-option" type="button">
-          <span>⌛ 마감임박순</span>
-          <strong></strong>
+        <button class="sort-option {% if sort == 'deadline' %}selected{% endif %}" 
+                type="button" data-sort="deadline">
+          <span>⌛ 마감임박순</span><strong>{% if sort == 'deadline' %}✓{% endif %}</strong>
         </button>
 
-        <button class="sort-option" type="button">
-          <span>↓ 가격 낮은 순</span>
-          <strong></strong>
+        <button class="sort-option {% if sort == 'price_low' %}selected{% endif %}" 
+                type="button" data-sort="price_low">
+          <span>↓ 가격 낮은 순</span><strong>{% if sort == 'price_low' %}✓{% endif %}</strong>
         </button>
 
-        <button class="sort-option" type="button">
-          <span>↑ 가격 높은 순</span>
-          <strong></strong>
+        <button class="sort-option {% if sort == 'price_high' %}selected{% endif %}" 
+                type="button" data-sort="price_high">
+          <span>↑ 가격 높은 순</span><strong>{% if sort == 'price_high' %}✓{% endif %}</strong>
         </button>
 
         <button class="cancel-btn" id="sortCloseBtn" type="button">취소</button>

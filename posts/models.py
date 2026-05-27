@@ -69,7 +69,6 @@ class groupsPost(TimeStampedModel):
     class Meta:
         verbose_name = '공구'
         verbose_name_plural = '공구 목록'
-        ordering = ['deadline']  # 기본 정렬 마감임박순
 
 class groupImage(models.Model):
     group = models.ForeignKey(
@@ -154,7 +153,6 @@ class sharingPost(TimeStampedModel):
     class Meta:
         verbose_name = '나눔'
         verbose_name_plural = '나눔 목록'
-        ordering = ['deadline']  # 기본 정렬 마감임박순
 
 class SharingImage(models.Model):             # 이미지 분리
     sharing = models.ForeignKey(sharingPost, on_delete=models.CASCADE, related_name='images')
@@ -183,3 +181,24 @@ class SharingParticipant(TimeStampedModel):
     class Meta:
         verbose_name = '나눔 신청'
         unique_together = ('sharing', 'user')
+
+# ================================================
+# 찜 (Wish)
+# ================================================
+class Wish(models.Model):
+    user    = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishes')
+    group   = models.ForeignKey(groupsPost,  on_delete=models.CASCADE, null=True, blank=True, related_name='wishes')
+    sharing = models.ForeignKey(sharingPost, on_delete=models.CASCADE, null=True, blank=True, related_name='wishes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = '찜'
+        # 같은 게시물 중복 찜 방지
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'group'],   condition=models.Q(group__isnull=False),   name='unique_wish_group'),
+            models.UniqueConstraint(fields=['user', 'sharing'], condition=models.Q(sharing__isnull=False), name='unique_wish_sharing'),
+        ]
+
+    def __str__(self):
+        target = self.group or self.sharing
+        return f'{self.user} → {target}'
