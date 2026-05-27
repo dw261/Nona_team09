@@ -26,17 +26,27 @@
           <h1>공구 개설</h1>
         </header>
 
-        <form class="create-form">
+        <form class="create-form" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
           <section class="form-card title-card">
-            <button type="button" class="image-upload">
+            <label class="image-upload">
               사진 추가<br />
               <span>(최대 5장)</span>
-            </button>
+              <input
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                hidden
+              />
+            </label>
 
             <div class="title-input-area">
               <div class="input-count-row">
                 <input
                   type="text"
+                  name="title"
                   maxlength="30"
                   placeholder="공구 제목을 입력해주세요"
                 />
@@ -44,10 +54,7 @@
               </div>
 
               <textarea
-<<<<<<< Updated upstream
-=======
                 name="content"
->>>>>>> Stashed changes
                 maxlength="100"
                 placeholder="유통기한과 구매수량을 입력해주세요&#10;(필수)"
               ></textarea>
@@ -58,21 +65,18 @@
 
           <section class="form-card">
             <div class="card-title-row">
-              <div>
-                <h2>카테고리 선택</h2>
-              </div>
-
-              <button type="button" class="small-icon-btn">⌕</button>
+              <h2>카테고리 선택</h2>
+              <button
+                type="button"
+                class="small-icon-btn"
+                id="categoryOpenBtn"
+                aria-label="카테고리 선택 열기"
+              >
+                ⌕
+              </button>
             </div>
 
-<<<<<<< Updated upstream
             <div class="category-list">
-              <button type="button" class="category active">✾ 야채</button>
-              <button type="button" class="category">🍎 과일</button>
-              <button type="button" class="category">▣ 가구</button>
-              <button type="button" class="category">▤ 도서</button>
-              <button type="button" class="category">⌂ 의류</button>
-=======
             <input
               type="hidden"
               name="category"
@@ -80,7 +84,6 @@
               value="{{ categories.0.pk }}"
             />
 
-            <div class="category-list">
               {% for category in categories %}
               <button
                 type="button"
@@ -91,7 +94,6 @@
                 {{ category.name }}
               </button>
               {% endfor %}
->>>>>>> Stashed changes
             </div>
           </section>
 
@@ -109,9 +111,6 @@
               </div>
             </div>
 
-<<<<<<< Updated upstream
-            <input type="range" min="2" max="10" value="4" id="peopleRange" />
-=======
             <input
               type="range"
               name="min_members"
@@ -120,22 +119,16 @@
               value="4"
               id="peopleRange"
             />
->>>>>>> Stashed changes
           </section>
 
-          <section class="form-card info-card">
-            <button type="button" class="info-row">
-              <span>▤ 1/N 금액</span>
-              <strong>4,000원</strong>
-            </button>
-
+          <section class="form-card info-card compact-info-card">
             <button type="button" class="info-row">
               <span>♙ 거래장소</span>
               <strong>태릉입구역 ›</strong>
             </button>
 
             <button type="button" class="info-row">
-              <span>⏰ 모집마감 시간</span>
+              <span>⏰ 모집마감시간</span>
               <strong>오늘 18 : 30</strong>
             </button>
           </section>
@@ -145,11 +138,7 @@
             <p>실제 상품 링크를 붙여주세요.</p>
 
             <div class="link-input-box">
-<<<<<<< Updated upstream
-              <input type="url" placeholder="https" />
-=======
               <input type="url" name="link" placeholder="https" />
->>>>>>> Stashed changes
               <button type="button">링크 붙여넣기</button>
             </div>
             <!-- input 없는 필드들 hidden으로 추가 (임시) -->
@@ -169,8 +158,6 @@
           </button>
         </form>
       </main>
-<<<<<<< Updated upstream
-=======
 
       <div class="dimmed" id="dimmed"></div>
 
@@ -218,7 +205,6 @@
           </button>
         </div>
       </section>
->>>>>>> Stashed changes
     </div>
 
     <script src="{% static 'app/js/nona.js' %}"></script>

@@ -1,10 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
 from posts.models import *
 from posts.forms import GroupPostForm, SharingPostForm
 from django.db.models import Case, When, IntegerField
+import json
 
 # ================================================
 # 공구
@@ -29,18 +30,17 @@ def group_list(request):
         'price_low': 'price_per',    # 가격 낮은순
         'price_high': '-price_per',  # 가격 높은순
     }
-<<<<<<< Updated upstream
-    queryset = queryset.order_by(sort_options.get(sort, 'deadline'))
-=======
+    
     secondary_sort = sort_options.get(sort, '-created_at')
 
-    queryset = groupsPost.objects \
-        .select_related('host', 'category') \
-        .prefetch_related('groupImages') \
-        .annotate(status_order=status_order) \
-        .order_by('status_order', secondary_sort) 
->>>>>>> Stashed changes
-
+    queryset = (
+        groupsPost.objects
+        .select_related('host', 'category')
+        .prefetch_related('groupImages')
+        .annotate(status_order=status_order)
+        .order_by('status_order', secondary_sort)
+    )
+    
     # 검색
     query = request.GET.get('q', '')
     if query:
@@ -191,9 +191,6 @@ def group_wish_toggle(request, group_id):
 
 # ================================================
 # 나눔
-<<<<<<< Updated upstream
-# ================================================
-=======
 # ================================================
 def shares_list(request):
     sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
@@ -352,4 +349,3 @@ def sharing_wish_toggle(request, share_id):
         Wish.objects.create(user=request.user, sharing=share)
         wished = True
     return JsonResponse({'wished': wished})
->>>>>>> Stashed changes

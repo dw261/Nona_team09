@@ -22,11 +22,6 @@
 
       <main class="home-page">
         <section class="top-search">
-<<<<<<< Updated upstream:templates/posts/home.html
-          <form action="{% url 'posts:group_list' %}" method="get" class="search-box" style="width: 100%; display: flex;">
-            <input type="text" name="q" value="{{ query }}" placeholder="상품 / 공구명 검색" />
-            <button type="submit">⌕</button> </form>
-=======
           <form
             action="{% url 'posts:group_list' %}"
             method="get"
@@ -42,14 +37,10 @@
             />
             <button type="submit">⌕</button>
           </form>
->>>>>>> Stashed changes:templates/posts/group_list.html
           <button class="alarm-btn" type="button">♡</button>
         </section>
 
         <section class="logo-area">
-<<<<<<< Updated upstream:templates/posts/home.html
-          <h1 class="logo-text">nona</h1>
-=======
           <a href="{% url 'posts:group_list' %}">
             <img
               class="logo-img"
@@ -57,7 +48,6 @@
               alt="nona"
             />
           </a>
->>>>>>> Stashed changes:templates/posts/group_list.html
         </section>
 
         <nav class="tab-menu">
@@ -71,13 +61,17 @@
 
         <section class="post-list">
           {% for group in groups %}
-          <article class="post-card" onclick="location.href='{% url 'posts:group_detail' group.id %}'" style="cursor: pointer;">
-            <div class="post-image" style="background-image: url('{{ group.groupImages.first.photo.url }}');"></div>
+          <article
+            class="post-card"
+            onclick="location.href='{% url 'posts:group_detail' group.id %}'"
+            style="cursor: pointer"
+          >
+            <div
+              class="post-image"
+              style="background-image: url('{{ group.groupImages.first.photo.url }}');"
+            ></div>
 
             <div class="post-content">
-<<<<<<< Updated upstream:templates/posts/home.html
-              <span class="badge orange">모집중</span> <span class="badge green">{{ group.category.name }}</span>
-=======
               {% if group.status == 'recruiting' %}
                 <span class="badge orange">모집중</span>
               {% elif group.status == 'closed' %}
@@ -86,11 +80,12 @@
                 <span class="badge orange">완료</span>
               {% endif %}
               <span class="badge green">{{ group.category.name }}</span>
->>>>>>> Stashed changes:templates/posts/group_list.html
 
               <h2>{{ group.title }}</h2>
               <p class="price">{{ group.price_per }}원</p>
-              <p class="people">{{ group.current_members }} / {{ group.min_members }}명 참여중</p>
+              <p class="people">
+                {{ group.current_members }} / {{ group.min_members }}명 참여중
+              </p>
 
               <div class="progress">
                 <span style="width: 75%"></span>
@@ -101,9 +96,16 @@
                 <span>♙ {{ group.location }}</span>
               </div>
             </div>
-            <button class="heart-btn" type="button"
-                    data-url="{% url 'posts:group_wish_toggle' group.id %}">
-              {% if group.id in wished_ids %}♥{% else %}♡{% endif %}
+            <button
+              class="heart-btn {% if group.id in wished_ids %}active{% endif %}"
+              type="button"
+              data-url="{% url 'posts:group_wish_toggle' group.id %}"
+            >
+                {% if group.id in wished_ids %}
+                    ♥
+                {% else %}
+                    ♡
+                {% endif %}
             </button>
           </article>
           {% empty %}
@@ -111,9 +113,7 @@
           {% endfor %}
         </section>
       </main>
-      
       <a href="{% url 'posts:group_create' %}" class="floating-btn">＋</a>
-
       <nav class="bottom-nav">
         <a href="#">
           ♡
