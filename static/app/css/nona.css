@@ -391,7 +391,7 @@ button {
 /* create page */
 
 .create-page {
-  padding: 74px 20px 34px;
+  padding: 0 20px 34px;
 }
 
 .page-header {
@@ -420,7 +420,7 @@ button {
 }
 
 .create-form {
-  padding-top: 106px;
+  padding-top: 89px;
 }
 
 .form-card {
@@ -800,4 +800,15 @@ button {
     left: auto;
     right: 20px;
   }
+}
+
+.logo-area {
+  padding-top: 28px;
+  text-align: center;
+}
+
+.logo-img {
+  width: 110px;
+  height: auto;
+  display: inline-block;
 }
