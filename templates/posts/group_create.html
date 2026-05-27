@@ -26,17 +26,27 @@
           <h1>공구 개설</h1>
         </header>
 
-        <form class="create-form">
+        <form class="create-form" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
           <section class="form-card title-card">
-            <button type="button" class="image-upload">
+            <label class="image-upload">
               사진 추가<br />
               <span>(최대 5장)</span>
-            </button>
+              <input
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                hidden
+              />
+            </label>
 
             <div class="title-input-area">
               <div class="input-count-row">
                 <input
                   type="text"
+                  name="title"
                   maxlength="30"
                   placeholder="공구 제목을 입력해주세요"
                 />
@@ -44,6 +54,7 @@
               </div>
 
               <textarea
+                name="description"
                 maxlength="100"
                 placeholder="유통기한과 구매수량을 입력해주세요&#10;(필수)"
               ></textarea>
@@ -54,19 +65,48 @@
 
           <section class="form-card">
             <div class="card-title-row">
-              <div>
-                <h2>카테고리 선택</h2>
-              </div>
-
-              <button type="button" class="small-icon-btn">⌕</button>
+              <h2>카테고리 선택</h2>
+              <button
+                type="button"
+                class="small-icon-btn"
+                id="categoryOpenBtn"
+                aria-label="카테고리 선택 열기"
+              >
+                ⌕
+              </button>
             </div>
 
+            <input
+              type="hidden"
+              name="category"
+              id="categoryInput"
+              value="야채"
+            />
+
             <div class="category-list">
-              <button type="button" class="category active">✾ 야채</button>
-              <button type="button" class="category">🍎 과일</button>
-              <button type="button" class="category">▣ 가구</button>
-              <button type="button" class="category">▤ 도서</button>
-              <button type="button" class="category">⌂ 의류</button>
+              <button
+                type="button"
+                class="category active"
+                data-category="야채"
+              >
+                ✾ 야채
+              </button>
+
+              <button type="button" class="category" data-category="과일">
+                ◌ 과일
+              </button>
+
+              <button type="button" class="category" data-category="가구">
+                ▣ 가구
+              </button>
+
+              <button type="button" class="category" data-category="도서">
+                ▤ 도서
+              </button>
+
+              <button type="button" class="category" data-category="생활">
+                ⌂ 생활
+              </button>
             </div>
           </section>
 
@@ -84,14 +124,28 @@
               </div>
             </div>
 
-            <input type="range" min="2" max="10" value="4" id="peopleRange" />
+            <input
+              type="range"
+              name="min_people"
+              min="2"
+              max="10"
+              value="4"
+              id="peopleRange"
+            />
           </section>
 
           <section class="form-card info-card">
-            <button type="button" class="info-row">
+            <label class="info-row">
               <span>▤ 1/N 금액</span>
-              <strong>4,000원</strong>
-            </button>
+              <input
+                class="info-input"
+                type="text"
+                name="price"
+                value="4,000원"
+                inputmode="numeric"
+                aria-label="1/N 금액"
+              />
+            </label>
 
             <button type="button" class="info-row">
               <span>♙ 거래장소</span>
@@ -109,7 +163,7 @@
             <p>실제 상품 링크를 붙여주세요.</p>
 
             <div class="link-input-box">
-              <input type="url" placeholder="https" />
+              <input type="url" name="product_url" placeholder="https" />
               <button type="button">링크 붙여넣기</button>
             </div>
           </section>
@@ -118,6 +172,86 @@
           <button class="delete-btn" type="button">취소할게요</button>
         </form>
       </main>
+
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          <button
+            class="category-sheet-option selected"
+            type="button"
+            data-category="야채"
+          >
+            <span>야채</span>
+            <strong>✓</strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="과일"
+          >
+            <span>과일</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="가구"
+          >
+            <span>가구</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="도서"
+          >
+            <span>도서</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="생활"
+          >
+            <span>생활</span>
+            <strong></strong>
+          </button>
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
     </div>
 
     <script src="{% static 'app/js/nona.js' %}"></script>
