@@ -92,8 +92,8 @@ const categorySheetOptions = document.querySelectorAll(
 );
 const categoryInput = document.getElementById("categoryInput");
 
-let selectedCategory = categoryInput ? categoryInput.value : "야채";
-let pendingCategory = selectedCategory;
+let selectedCategory = null;
+let pendingCategory = null;
 
 function openCategorySheet() {
   if (!categorySheet || !dimmed) return;
@@ -115,11 +115,11 @@ function closeCategorySheet() {
 
 function updateCategoryChips(category) {
   categoryButtons.forEach((button) => {
-    button.classList.toggle("active", button.dataset.category === category);
+    button.classList.toggle("active", category !== null && button.dataset.category === category);
   });
-
+ 
   if (categoryInput) {
-    categoryInput.value = category;
+    categoryInput.value = category ?? "";
   }
 }
 
@@ -146,14 +146,18 @@ categoryButtons.forEach((button) => {
 
 categorySheetOptions.forEach((option) => {
   option.addEventListener("click", () => {
-    pendingCategory = option.dataset.category;
+    if (pendingCategory === option.dataset.category) {
+      pendingCategory = null;
+    } else {
+      pendingCategory = option.dataset.category;
+    }
     updateCategorySheetSelection(pendingCategory);
   });
 });
 
 if (categoryResetBtn) {
   categoryResetBtn.addEventListener("click", () => {
-    pendingCategory = "야채";
+    pendingCategory = null;
     updateCategorySheetSelection(pendingCategory);
   });
 }
@@ -196,3 +200,32 @@ if (descriptionTextarea && textareaCount) {
     textareaCount.textContent = `${descriptionTextarea.value.length} / ${descriptionTextarea.maxLength}`;
   });
 }
+
+document.querySelectorAll('.sort-option').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const sort = btn.dataset.sort;
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', sort);
+    window.location.href = url.toString();
+  });
+});
+
+document.querySelectorAll(".heart-btn").forEach(btn => {
+    btn.addEventListener("click", async function(e){
+        // 상세페이지 이동 막기
+        e.stopPropagation();
+        const url=this.dataset.url;
+        const response=await fetch(url,{
+            method:"POST",
+            headers:{
+                "X-CSRFToken":"{{ csrf_token }}",
+                "X-Requested-With":"XMLHttpRequest"
+            }
+        });
+
+        if(response.ok){
+            const data=await response.json();
+            this.innerText=data.wished ? "♥":"♡";
+        }
+    });
+});

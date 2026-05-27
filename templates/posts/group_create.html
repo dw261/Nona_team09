@@ -54,7 +54,7 @@
               </div>
 
               <textarea
-                name="description"
+                name="content"
                 maxlength="100"
                 placeholder="유통기한과 구매수량을 입력해주세요&#10;(필수)"
               ></textarea>
@@ -76,37 +76,24 @@
               </button>
             </div>
 
+            <div class="category-list">
             <input
               type="hidden"
               name="category"
               id="categoryInput"
-              value="야채"
+              value="{{ categories.0.pk }}"
             />
 
-            <div class="category-list">
+              {% for category in categories %}
               <button
                 type="button"
-                class="category active"
-                data-category="야채"
+                class="category"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
               >
-                ✾ 야채
+                {{ category.name }}
               </button>
-
-              <button type="button" class="category" data-category="과일">
-                ◌ 과일
-              </button>
-
-              <button type="button" class="category" data-category="가구">
-                ▣ 가구
-              </button>
-
-              <button type="button" class="category" data-category="도서">
-                ▤ 도서
-              </button>
-
-              <button type="button" class="category" data-category="생활">
-                ⌂ 생활
-              </button>
+              {% endfor %}
             </div>
           </section>
 
@@ -126,7 +113,7 @@
 
             <input
               type="range"
-              name="min_people"
+              name="min_members"
               min="2"
               max="10"
               value="4"
@@ -151,13 +138,24 @@
             <p>실제 상품 링크를 붙여주세요.</p>
 
             <div class="link-input-box">
-              <input type="url" name="product_url" placeholder="https" />
+              <input type="url" name="link" placeholder="https" />
               <button type="button">링크 붙여넣기</button>
             </div>
+            <!-- input 없는 필드들 hidden으로 추가 (임시) -->
+            <input type="hidden" name="location" value="미정" />
+            <input type="hidden" name="deadline" value="2099-12-31T00:00" />
+            <input type="hidden" name="price_per" value="0" />
           </section>
 
           <button class="submit-btn" type="submit">공구 시작하기</button>
-          <button class="delete-btn" type="button">취소할게요</button>
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% url 'posts:group_list' %}"
+          >
+            취소할게요
+          </button>
         </form>
       </main>
 
@@ -176,50 +174,17 @@
         </label>
 
         <div class="category-sheet-options">
-          <button
-            class="category-sheet-option selected"
-            type="button"
-            data-category="야채"
-          >
-            <span>야채</span>
-            <strong>✓</strong>
-          </button>
-
+          {% for category in categories %}
           <button
             class="category-sheet-option"
             type="button"
-            data-category="과일"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
           >
-            <span>과일</span>
+            <span>{{ category.name }}</span>
             <strong></strong>
           </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="가구"
-          >
-            <span>가구</span>
-            <strong></strong>
-          </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="도서"
-          >
-            <span>도서</span>
-            <strong></strong>
-          </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="생활"
-          >
-            <span>생활</span>
-            <strong></strong>
-          </button>
+          {% endfor %}
         </div>
 
         <div class="category-sheet-actions">
