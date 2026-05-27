@@ -196,12 +196,3 @@ if (descriptionTextarea && textareaCount) {
     textareaCount.textContent = `${descriptionTextarea.value.length} / ${descriptionTextarea.maxLength}`;
   });
 }
-
-/* editable price */
-const priceInput = document.querySelector(".info-input");
-
-if (priceInput) {
-  priceInput.addEventListener("focus", () => {
-    priceInput.select();
-  });
-}

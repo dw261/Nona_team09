@@ -812,3 +812,11 @@ button {
   height: auto;
   display: inline-block;
 }
+
+.compact-info-card {
+  min-height: 106px;
+}
+
+.compact-info-card .info-row {
+  height: 53px;
+}
