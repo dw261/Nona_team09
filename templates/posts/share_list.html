@@ -5,7 +5,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nona - 공구</title>
+    <title>nona - 나눔</title>
     <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
   </head>
   <body>
@@ -20,7 +20,7 @@
       <main class="home-page">
         <section class="top-search">
           <div class="search-box">
-            <input type="text" placeholder="상품 / 공구명 검색" />
+            <input type="text" placeholder="나눔 물품 검색" />
             <button type="button">⌕</button>
           </div>
           <button class="alarm-btn" type="button">♡</button>
@@ -35,8 +35,8 @@
         </section>
 
         <nav class="tab-menu">
-          <a href="{% url 'group_list' %}" class="active">공구</a>
-          <a href="{% url 'share_list' %}">나눔</a>
+          <a href="{% url 'group_list' %}">공구</a>
+          <a href="{% url 'share_list' %}" class="active">나눔</a>
         </nav>
 
         <section class="sort-row">
@@ -47,14 +47,13 @@
           <article class="post-card">
             <div class="post-image carrot"></div>
             <div class="post-content">
-              <span class="badge status-recruiting">모집중</span>
+              <span class="badge status-recruiting">나눔중</span>
               <span class="badge green">야채</span>
-              <h2>양배추랑 당근 같이 사요!</h2>
-              <p class="price">4,000원</p>
-              <p class="people">3 / 4명 참여중</p>
-              <div class="progress"><span style="width: 75%"></span></div>
+              <h2>당근 조금 나눔해요</h2>
+              <p class="price">무료나눔</p>
+              <p class="people">4개</p>
               <div class="post-meta">
-                <span>♡ 18:30 마감</span><span>♙ 태릉입구</span>
+                <span>♡ 오늘 18:30</span><span>♙ 태릉입구</span>
               </div>
             </div>
             <button class="heart-btn" type="button" aria-label="찜하기">
@@ -67,30 +66,11 @@
             <div class="post-content">
               <span class="badge status-closed">마감</span>
               <span class="badge green">생활</span>
-              <h2>화장지 30롤 같이 나눠요</h2>
-              <p class="price">6,200원</p>
-              <p class="people">6 / 6명 참여완료</p>
-              <div class="progress"><span style="width: 100%"></span></div>
+              <h2>휴지 몇 롤 나눔합니다</h2>
+              <p class="price">무료나눔</p>
+              <p class="people">예약 완료</p>
               <div class="post-meta">
                 <span>♡ 마감</span><span>♙ 화랑대</span>
-              </div>
-            </div>
-            <button class="heart-btn" type="button" aria-label="찜하기">
-              ♡
-            </button>
-          </article>
-
-          <article class="post-card">
-            <div class="post-image egg"></div>
-            <div class="post-content">
-              <span class="badge status-complete">완료</span>
-              <span class="badge green">식품</span>
-              <h2>무항생제 계란 같이 사요</h2>
-              <p class="price">5,500원</p>
-              <p class="people">5 / 5명 거래완료</p>
-              <div class="progress"><span style="width: 100%"></span></div>
-              <div class="post-meta">
-                <span>♡ 완료</span><span>♙ 태릉입구</span>
               </div>
             </div>
             <button class="heart-btn" type="button" aria-label="찜하기">
@@ -133,20 +113,6 @@
         </button>
         <button class="sort-option" type="button" data-sort-label="마감임박순↓">
           <span>⌛ 마감임박순</span><strong></strong>
-        </button>
-        <button
-          class="sort-option"
-          type="button"
-          data-sort-label="가격 낮은순↓"
-        >
-          <span>↓ 가격 낮은 순</span><strong></strong>
-        </button>
-        <button
-          class="sort-option"
-          type="button"
-          data-sort-label="가격 높은순↓"
-        >
-          <span>↑ 가격 높은 순</span><strong></strong>
         </button>
         <button class="cancel-btn" id="sortCloseBtn" type="button">취소</button>
       </section>
