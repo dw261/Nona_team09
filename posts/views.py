@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from posts.models import *
 from posts.forms import GroupPostForm, SharingPostForm
 from django.db.models import Case, When, IntegerField, Q
+from django.utils.dateparse import parse_datetime
 import json
 
 # ================================================
@@ -81,13 +82,22 @@ def group_create(request):
         if form.is_valid():
             group = form.save(commit=False)
             group.host = request.user
+
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                # 'YYYY-MM-DDTHH:MM:SS' 포맷 문자열 생성 후 파싱
+                group.deadline = parse_datetime(f"{date_str}T{time_str}:00")
+
             group.save()
 
             images = request.FILES.getlist('images')
             for order, image in enumerate(images):
                 groupImage.objects.create(group=group, photo=image, order=order)
 
-            return redirect('posts:group_detail', pk=group.pk)
+            return redirect('posts:group_detail', group_id=group.pk)
+        else:
+            print("❌ 나눔 개설 폼 검증 실패:", form.errors)
     else:
         form = GroupPostForm()
 
@@ -264,13 +274,21 @@ def shares_create(request):
         if form.is_valid():
             share = form.save(commit=False)
             share.host = request.user
+
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                share.deadline = parse_datetime(f"{date_str}T{time_str}:00")
+
             share.save()
 
             images = request.FILES.getlist('images')
             for order, image in enumerate(images):
                 SharingImage.objects.create(sharing=share, photo=image, order=order)
 
-            return redirect('posts:shares_detail', pk=share.pk)
+            return redirect('posts:shares_detail', share_id=share.pk)
+        else:
+            print("❌ 나눔 개설 폼 검증 실패:", form.errors)
     else:
         form = SharingPostForm()
 
@@ -279,7 +297,7 @@ def shares_create(request):
 # 나눔 상세 페이지
 def shares_detail(request, share_id):
     share = get_object_or_404(
-        sharingPost.objects.select_related('host', 'category').prefetch_related('images', 'participants__user'), 
+        sharingPost.objects.select_related('host', 'category').prefetch_related('shareImage'), 
         pk=share_id
     )
     is_participated = False
@@ -290,9 +308,7 @@ def shares_detail(request, share_id):
     context = {
         'sharing': share,
         'is_participated': is_participated,
-        'participation_count': share.SharingParticipant.filter(
-            status='approved'
-        ).count(),
+        'participation_count': SharingParticipant.objects.filter(sharing=share, status='approved').count(),
     }
 
     return render(request, 'posts/share_detail.html', context)

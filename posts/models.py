@@ -140,10 +140,9 @@ class sharingPost(TimeStampedModel):
     title = models.CharField(max_length=100, verbose_name="제목")
     content = models.TextField(verbose_name="내용")
     quantity   = models.PositiveIntegerField(verbose_name='물건 개수')
-    location   = models.CharField(max_length=200, verbose_name='거래 장소')
-    trade_time = models.DateTimeField(verbose_name='거래 시간')
+    location   = models.CharField(max_length=100, verbose_name="거래 장소")
     deadline   = models.DateTimeField(verbose_name='모집 마감 시간')
-    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
+    status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='recruiting')
 
     def __str__(self):
         return self.title

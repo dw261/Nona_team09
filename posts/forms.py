@@ -2,6 +2,7 @@ from django import forms
 from posts.models import groupsPost, sharingPost
 
 class GroupPostForm(forms.ModelForm):
+    deadline = forms.DateTimeField(required=False, widget=forms.HiddenInput())
     class Meta:
         model = groupsPost
         fields = [
@@ -21,12 +22,12 @@ class GroupPostForm(forms.ModelForm):
             'min_members': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
             'price_per'  : forms.NumberInput(attrs={'class': 'form-control', 'min': 0}),
             'location'   : forms.TextInput(attrs={'class': 'form-control', 'placeholder': '거래 장소'}),
-            'deadline'   : forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
             'link'       : forms.URLInput(attrs={'class': 'form-control', 'placeholder': '판매 링크 (선택)'}),
         }
 
 
 class SharingPostForm(forms.ModelForm):
+    deadline = forms.DateTimeField(required=False, widget=forms.HiddenInput())
     class Meta:
         model = sharingPost
         fields = [
@@ -35,7 +36,6 @@ class SharingPostForm(forms.ModelForm):
             'content',
             'quantity',
             'location',
-            'trade_time',
             'deadline',
         ]
         widgets = {
@@ -43,7 +43,5 @@ class SharingPostForm(forms.ModelForm):
             'title'     : forms.TextInput(attrs={'class': 'form-control', 'placeholder': '제목'}),
             'content'   : forms.Textarea(attrs={'class': 'form-control', 'placeholder': '내용', 'rows': 5}),
             'quantity'  : forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'location'  : forms.TextInput(attrs={'class': 'form-control', 'placeholder': '거래 장소'}),
-            'trade_time': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
-            'deadline'  : forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}),
+            'location'   : forms.TextInput(attrs={'class': 'form-control', 'placeholder': '거래 장소'}),
         }

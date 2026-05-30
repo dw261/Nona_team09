@@ -242,3 +242,27 @@ if (descriptionTextarea && textareaCount) {
 document.querySelectorAll(".info-input").forEach((input) => {
   input.addEventListener("focus", () => input.select());
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const dateInput = document.getElementById("deadlineDate");
+  const timeInput = document.getElementById("deadlineTime");
+
+  if (dateInput && timeInput) {
+    const now = new Date();
+
+    // 1. 현재 날짜 구하기 (YYYY-MM-DD 형식)
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const formattedDate = `${year}-${month}-${day}`;
+
+    // 2. 현재 시각 구하기 (HH:MM 형식)
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const formattedTime = `${hours}:${minutes}`;
+
+    // 3. 각각의 input value에 값 대입
+    dateInput.value = formattedDate;
+    timeInput.value = formattedTime;
+  }
+});

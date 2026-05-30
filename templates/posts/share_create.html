@@ -19,7 +19,7 @@
 
       <main class="create-page share-create-page">
         <header class="page-header">
-          <a href="{% url 'group_list' %}" class="back-btn">‹</a>
+          <a href="{% url 'posts:share_list' %}" class="back-btn">‹</a>
           <h1>나눔 개설</h1>
         </header>
 
@@ -49,9 +49,9 @@
                 <span>0 / 30</span>
               </div>
               <textarea
-                name="description"
+                name="content"
                 maxlength="100"
-                placeholder="나눔 내용을 입력해주세요&#10;(필수)"
+                placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
               ></textarea>
               <div class="textarea-count">0 / 100</div>
             </div>
@@ -64,32 +64,24 @@
                 ⌕
               </button>
             </div>
+            <div class="category-list">
             <input
               type="hidden"
               name="category"
               id="categoryInput"
-              value="야채"
+              value="{{ categories.0.pk }}"
             />
-            <div class="category-list">
+
+              {% for category in categories %}
               <button
                 type="button"
-                class="category active"
-                data-category="야채"
+                class="category"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
               >
-                ♧ 야채
+                {{ category.name }}
               </button>
-              <button type="button" class="category" data-category="과일">
-                ◌ 과일
-              </button>
-              <button type="button" class="category" data-category="가구">
-                ▣ 가구
-              </button>
-              <button type="button" class="category" data-category="도서">
-                ▤ 도서
-              </button>
-              <button type="button" class="category" data-category="생활">
-                ⌂ 생활
-              </button>
+              {% endfor %}
             </div>
           </section>
 
@@ -101,7 +93,7 @@
               </div>
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
-                <strong id="peopleCount">4개</strong>
+                <strong id="peopleCount">1개</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
@@ -110,7 +102,7 @@
               name="quantity"
               min="1"
               max="4"
-              value="4"
+              value="1"
               id="peopleRange"
               data-unit="개"
             />
@@ -125,19 +117,35 @@
                 class="info-input"
                 type="text"
                 name="location"
-                value="태릉입구역"
+                placeholder="장소를 입력해 주세요"
               />
             </label>
             <label class="info-row">
               <span class="info-label"
                 ><span class="info-symbol">◷</span> 모집 마감 시간</span
               >
-              <input
-                class="info-input"
-                type="text"
-                name="deadline"
-                value="오늘 18 : 30"
-              />
+              <div class="deadline-wrapper" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="min-width: 40px;">날짜:</span>
+                  <input
+                    id="deadlineDate"
+                    class="info-input"
+                    type="date"
+                    name="deadline_date"
+                    style="flex: 1;"
+                  />
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="min-width: 40px;">시각:</span>
+                  <input
+                    id="deadlineTime"
+                    class="info-input"
+                    type="time"
+                    name="deadline_time"
+                    style="flex: 1;"
+                  />
+                </div>
+              </div>
             </label>
           </section>
 
@@ -149,12 +157,61 @@
             </p>
           </section>
 
-          <button class="submit-btn" type="submit">공구 시작하기</button>
-          <button class="delete-btn" type="button">취소할게요</button>
+          <button class="submit-btn" type="submit">나눔 시작하기</button>
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% url 'posts:share_list' %}"
+          >취소할게요</button>
         </form>
       </main>
-    </div>
+      <div class="dimmed" id="dimmed"></div>
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
 
+        <label class="category-search">
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          {% for category in categories %}
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
+          >
+            <span>{{ category.name }}</span>
+            <strong></strong>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
+    </div>
     <script src="{% static 'app/js/nona.js' %}"></script>
   </body>
 </html>
