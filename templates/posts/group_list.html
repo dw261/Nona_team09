@@ -9,6 +9,7 @@
 
     <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
   </head>
+
   <body>
     <div class="mobile-wrap">
       <header class="status-bar">
@@ -34,6 +35,11 @@
               value="{{ query }}"
               placeholder="상품 / 공구명 검색"
             />
+            <input
+              type="hidden"
+              name="sort"
+              value="{{ sort|default:'latest' }}"
+            />
             <button type="submit">⌕</button>
           </form>
 
@@ -52,7 +58,7 @@
 
         <nav class="tab-menu">
           <a href="{% url 'posts:group_list' %}" class="active">공구</a>
-          <a href="{% url 'posts:share_list' %}">나눔</a>
+          <a href="{% url 'posts:shares_list' %}">나눔</a>
         </nav>
 
         <section class="sort-row">
@@ -70,17 +76,19 @@
             onclick="location.href='{% url 'posts:group_detail' group.id %}'"
             style="cursor: pointer"
           >
+            {% with first_image=group.groupImages.first %}
             <div
               class="post-image"
               {%
               if
-              group.groupImages.first
+              first_image
               %}
-              style="background-image: url('{{ group.groupImages.first.photo.url }}');"
+              style="background-image: url('{{ first_image.photo.url }}');"
               {%
               endif
               %}
             ></div>
+            {% endwith %}
 
             <div class="post-content">
               {% if group.status == 'recruiting' %}
@@ -116,6 +124,7 @@
               type="button"
               data-url="{% url 'posts:group_wish_toggle' group.id %}"
               aria-label="찜하기"
+              onclick="event.stopPropagation()"
             >
               {% if group.id in wished_ids %} ♥ {% else %} ♡ {% endif %}
             </button>
@@ -133,7 +142,7 @@
             <span>공구 글쓰기</span>
           </a>
 
-          <a href="{% url 'posts:share_create' %}" class="write-menu-item">
+          <a href="{% url 'posts:shares_create' %}" class="write-menu-item">
             <span class="write-menu-icon">♨</span>
             <span>나눔 글쓰기</span>
           </a>
@@ -168,6 +177,7 @@
           class="sort-option {% if sort == 'latest' or not sort %}selected{% endif %}"
           type="button"
           data-sort="latest"
+          data-sort-label="최신순↓"
         >
           <span>◉ 최신순</span>
           <strong>{% if sort == 'latest' or not sort %}✓{% endif %}</strong>
@@ -177,6 +187,7 @@
           class="sort-option {% if sort == 'oldest' %}selected{% endif %}"
           type="button"
           data-sort="oldest"
+          data-sort-label="오래된순↓"
         >
           <span>◷ 오래된 순</span>
           <strong>{% if sort == 'oldest' %}✓{% endif %}</strong>
@@ -186,6 +197,7 @@
           class="sort-option {% if sort == 'deadline' %}selected{% endif %}"
           type="button"
           data-sort="deadline"
+          data-sort-label="마감임박순↓"
         >
           <span>⌛ 마감임박순</span>
           <strong>{% if sort == 'deadline' %}✓{% endif %}</strong>
@@ -195,6 +207,7 @@
           class="sort-option {% if sort == 'price_low' %}selected{% endif %}"
           type="button"
           data-sort="price_low"
+          data-sort-label="가격 낮은순↓"
         >
           <span>↓ 가격 낮은 순</span>
           <strong>{% if sort == 'price_low' %}✓{% endif %}</strong>
@@ -204,6 +217,7 @@
           class="sort-option {% if sort == 'price_high' %}selected{% endif %}"
           type="button"
           data-sort="price_high"
+          data-sort-label="가격 높은순↓"
         >
           <span>↑ 가격 높은 순</span>
           <strong>{% if sort == 'price_high' %}✓{% endif %}</strong>

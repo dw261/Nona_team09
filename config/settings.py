@@ -32,14 +32,15 @@ LOGIN_URL = '/admin/login/'  # 일단 admin 로그인 페이지로 임시 연결
 # Application definition
 
 INSTALLED_APPS = [
+    'chat',
     'posts',
-    
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -68,6 +69,17 @@ TEMPLATES = [
         },
     },
 ]
+
+
+# Channels 설정
+ASGI_APPLICATION = 'config.asgi.application'
+
+# Channels 레이어(메모리 백엔드, 개발용)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

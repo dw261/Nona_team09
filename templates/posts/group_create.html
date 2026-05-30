@@ -8,6 +8,7 @@
     <title>nona - 공구 개설</title>
     <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
   </head>
+
   <body>
     <div class="mobile-wrap">
       <header class="status-bar">
@@ -52,7 +53,7 @@
               </div>
 
               <textarea
-                name="description"
+                name="content"
                 maxlength="100"
                 placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
               ></textarea>
@@ -73,52 +74,43 @@
               type="hidden"
               name="category"
               id="categoryInput"
-              value="야채"
+              value="{{ categories.0.pk }}"
             />
 
             <div class="category-list">
+              {% for category in categories %}
               <button
                 type="button"
-                class="category active"
-                data-category="야채"
+                class="category {% if forloop.first %}active{% endif %}"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
               >
-                ♧ 야채
+                {{ category.name }}
               </button>
-              <button type="button" class="category" data-category="과일">
-                ◌ 과일
-              </button>
-              <button type="button" class="category" data-category="가구">
-                ▣ 가구
-              </button>
-              <button type="button" class="category" data-category="도서">
-                ▤ 도서
-              </button>
-              <button type="button" class="category" data-category="생활">
-                ⌂ 생활
-              </button>
+              {% endfor %}
             </div>
           </section>
 
           <section class="form-card people-card">
             <div class="people-head">
               <div>
-                <h2>최소 모집인원 <span id="peopleSubText">4명 모집</span></h2>
+                <h2>최소 모집인원 <span id="peopleSubText">2명 모집</span></h2>
                 <p>모집인원이 모두 모이면 자동으로 마감돼요.</p>
               </div>
 
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
-                <strong id="peopleCount">4명</strong>
+                <strong id="peopleCount">2명</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
 
             <input
               type="range"
-              name="min_people"
+              name="min_members"
               min="2"
               max="10"
-              value="4"
+              value="2"
               id="peopleRange"
             />
           </section>
@@ -131,8 +123,8 @@
               <input
                 class="info-input"
                 type="text"
-                name="price"
-                value="4,000원"
+                name="price_per"
+                placeholder="1/N 금액"
                 inputmode="numeric"
               />
             </label>
@@ -145,20 +137,36 @@
                 class="info-input"
                 type="text"
                 name="location"
-                value="태릉입구역"
+                placeholder="장소를 입력해 주세요"
               />
             </label>
 
-            <label class="info-row">
+            <label class="info-row deadline-row">
               <span class="info-label">
                 <span class="info-symbol">◷</span> 모집 마감 시간
               </span>
-              <input
-                class="info-input"
-                type="text"
-                name="deadline"
-                value="오늘 18 : 30"
-              />
+
+              <div class="deadline-wrapper">
+                <div class="deadline-input-row">
+                  <span>날짜</span>
+                  <input
+                    id="deadlineDate"
+                    class="info-input"
+                    type="date"
+                    name="deadline_date"
+                  />
+                </div>
+
+                <div class="deadline-input-row">
+                  <span>시각</span>
+                  <input
+                    id="deadlineTime"
+                    class="info-input"
+                    type="time"
+                    name="deadline_time"
+                  />
+                </div>
+              </div>
             </label>
           </section>
 
@@ -174,7 +182,15 @@
           </section>
 
           <button class="submit-btn" type="submit">공구 시작하기</button>
-          <button class="delete-btn" type="button">취소할게요</button>
+
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% url 'posts:group_list' %}"
+          >
+            취소할게요
+          </button>
         </form>
       </main>
 
@@ -184,55 +200,26 @@
         <h3>카테고리 선택</h3>
 
         <label class="category-search">
-          <input type="search" placeholder="카테고리 검색" />
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
           <span>⌕</span>
         </label>
 
         <div class="category-sheet-options">
+          {% for category in categories %}
           <button
-            class="category-sheet-option selected"
+            class="category-sheet-option {% if forloop.first %}selected{% endif %}"
             type="button"
-            data-category="야채"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
           >
-            <span>야채</span>
-            <strong>✓</strong>
+            <span>{{ category.name }}</span>
+            <strong>{% if forloop.first %}✓{% endif %}</strong>
           </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="과일"
-          >
-            <span>과일</span>
-            <strong></strong>
-          </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="가구"
-          >
-            <span>가구</span>
-            <strong></strong>
-          </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="도서"
-          >
-            <span>도서</span>
-            <strong></strong>
-          </button>
-
-          <button
-            class="category-sheet-option"
-            type="button"
-            data-category="생활"
-          >
-            <span>생활</span>
-            <strong></strong>
-          </button>
+          {% endfor %}
         </div>
 
         <div class="category-sheet-actions">
@@ -243,6 +230,7 @@
           >
             초기화
           </button>
+
           <button
             class="category-apply-btn"
             id="categoryApplyBtn"

@@ -4,15 +4,15 @@ from django.views.decorators.http import require_POST, require_http_methods
 from django.http import JsonResponse
 from posts.models import *
 from posts.forms import GroupPostForm, SharingPostForm
-from django.db.models import Case, When, IntegerField
+from django.db.models import Case, When, IntegerField, Q
+from django.utils.dateparse import parse_datetime
 import json
 
 # ================================================
 # 공구
 # ================================================
 def group_list(request):
-    sort = request.GET.get('sort', 'latest')  # 기본값은 마감임박순
-    queryset = groupsPost.objects.select_related('host', 'category').prefetch_related('groupImages')
+    current_sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
 
     # 상태 우선순위 정렬 (모집중 → 마감 → 완료)
     status_order = Case(
@@ -22,7 +22,7 @@ def group_list(request):
         default=3,
         output_field=IntegerField(),
     )
-
+    
     sort_options = {
         'deadline': 'deadline',  # 마감임박순
         'latest': '-created_at', # 최신순
@@ -31,7 +31,7 @@ def group_list(request):
         'price_high': '-price_per',  # 가격 높은순
     }
     
-    secondary_sort = sort_options.get(sort, '-created_at')
+    secondary_sort = sort_options.get(current_sort, '-created_at')
 
     queryset = (
         groupsPost.objects
@@ -40,29 +40,35 @@ def group_list(request):
         .annotate(status_order=status_order)
         .order_by('status_order', secondary_sort)
     )
-    
+
     # 검색
     query = request.GET.get('q', '')
     if query:
-        queryset = queryset.filter(title__icontains=query)
+        keywords = [kw.strip() for kw in query.split(',') if kw.strip()]
+        
+        query_filter = Q()
+        for kw in keywords:
+            # 각 키워드가 제목(title)에 포함되어 있는가? (OR 조건 축적)
+            query_filter |= Q(title__icontains=kw)
+            
+        queryset = queryset.filter(query_filter)
     
     # 카테고리 필터
     category_id = request.GET.get('category', '')
     if category_id:
         queryset = queryset.filter(category_id=category_id)
-
-    # 찜한 group id 목록
-    wished_ids = set()
+ 
+    # 찜 목록
+    wished_ids = []
     if request.user.is_authenticated:
-        wished_ids = set(
-            Wish.objects.filter(user=request.user, group__isnull=False)
-            .values_list('group_id', flat=True)
+        wished_ids = list(
+            request.user.wishes.filter(group__isnull=False).values_list('group_id', flat=True)
         )
 
     context = {
         'groups': queryset,
         'categories': Category.objects.all(),
-        'sort': sort,
+        'current_sort': current_sort,
         'query': query,
         'wished_ids': wished_ids,
     }
@@ -76,13 +82,22 @@ def group_create(request):
         if form.is_valid():
             group = form.save(commit=False)
             group.host = request.user
+
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                # 'YYYY-MM-DDTHH:MM:SS' 포맷 문자열 생성 후 파싱
+                group.deadline = parse_datetime(f"{date_str}T{time_str}:00")
+
             group.save()
 
             images = request.FILES.getlist('images')
             for order, image in enumerate(images):
                 groupImage.objects.create(group=group, photo=image, order=order)
 
-            return redirect('posts:group_detail', pk=group.pk)
+            return redirect('posts:group_detail', group_id=group.pk)
+        else:
+            print("❌ 나눔 개설 폼 검증 실패:", form.errors)
     else:
         form = GroupPostForm()
 
@@ -153,7 +168,7 @@ def group_delete(request, group_id):
         pk=group_id,
         host=request.user,
     )
-    group.deadline
+    group.delete()
     return redirect('posts:group_list')
 
 # 공구 참여
@@ -176,6 +191,7 @@ def group_participate(request, group_id):
 
     return redirect('chat:room', pk=group_id)  # 채팅방으로 이동
 
+# 공구 찜 토글
 @login_required
 @require_POST
 def group_wish_toggle(request, group_id):
@@ -193,8 +209,7 @@ def group_wish_toggle(request, group_id):
 # 나눔
 # ================================================
 def shares_list(request):
-    sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
-    queryset = sharingPost.objects.select_related('host', 'category').prefetch_related('images')
+    current_sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
 
     status_order = Case(
         When(status='recruiting', then=0),
@@ -209,31 +224,47 @@ def shares_list(request):
         'latest': '-created_at', # 최신순
         'oldest': 'created_at',  # 오래된순
     }
-    secondary_sort = sort_options.get(sort, 'latest')
+    secondary_sort = sort_options.get(current_sort, '-created_at')
 
-    queryset = sharingPost.objects \
-        .select_related('host', 'category') \
-        .prefetch_related('images') \
-        .annotate(status_order=status_order) \
+    queryset = (
+        sharingPost.objects
+        .select_related('host', 'category')
+        .prefetch_related('shareImage')
+        .annotate(status_order=status_order)
         .order_by('status_order', secondary_sort)
+    )
 
     # 검색
     query = request.GET.get('q', '')
     if query:
-        queryset = queryset.filter(title__icontains=query)
+        keywords = [kw.strip() for kw in query.split(',') if kw.strip()]
+        
+        query_filter = Q()
+        for kw in keywords:
+            query_filter |= Q(title__icontains=kw)
+            
+        queryset = queryset.filter(query_filter)
     
     # 카테고리 필터
     category_id = request.GET.get('category', '')
     if category_id:
         queryset = queryset.filter(category_id=category_id)
+ 
+    # 찜 목록
+    wished_ids = []
+    if request.user.is_authenticated:
+        wished_ids = list(
+            request.user.wishes.filter(sharing__isnull=False).values_list('sharing_id', flat=True)
+        )
 
     context = {
         'shares': queryset,
-        'categories': Category.objects.all(),
-        'sort': sort,
         'query': query,
+        'current_sort': current_sort, 
+        'categories': Category.objects.all(),
+        'wished_ids': wished_ids,
     }
-    return render(request, 'posts/shares_list.html', context)
+    return render(request, 'posts/share_list.html', context)
 
 # 나눔 개설 페이지
 @login_required
@@ -243,22 +274,30 @@ def shares_create(request):
         if form.is_valid():
             share = form.save(commit=False)
             share.host = request.user
+
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                share.deadline = parse_datetime(f"{date_str}T{time_str}:00")
+
             share.save()
 
             images = request.FILES.getlist('images')
             for order, image in enumerate(images):
                 SharingImage.objects.create(sharing=share, photo=image, order=order)
 
-            return redirect('posts:shares_detail', pk=share.pk)
+            return redirect('posts:shares_detail', share_id=share.pk)
+        else:
+            print("❌ 나눔 개설 폼 검증 실패:", form.errors)
     else:
         form = SharingPostForm()
 
-    return render(request, 'posts/shares_create.html', {'form': form, 'categories': Category.objects.all()})
+    return render(request, 'posts/share_create.html', {'form': form, 'categories': Category.objects.all()})
 
 # 나눔 상세 페이지
 def shares_detail(request, share_id):
     share = get_object_or_404(
-        sharingPost.objects.select_related('host', 'category').prefetch_related('images', 'participants__user'), 
+        sharingPost.objects.select_related('host', 'category').prefetch_related('shareImage'), 
         pk=share_id
     )
     is_participated = False
@@ -269,12 +308,10 @@ def shares_detail(request, share_id):
     context = {
         'sharing': share,
         'is_participated': is_participated,
-        'participation_count': share.SharingParticipant.filter(
-            status='approved'
-        ).count(),
+        'participation_count': SharingParticipant.objects.filter(sharing=share, status='approved').count(),
     }
 
-    return render(request, 'posts/shares_detail.html', context)
+    return render(request, 'posts/share_detail.html', context)
 
 # 나눔 수정 페이지
 @login_required
@@ -337,6 +374,7 @@ def shares_participate(request, share_id):
 
     return redirect('chat:room', pk=share_id)  # 채팅방으로 이동
 
+# 나눔 찜 토글
 @login_required
 @require_POST
 def sharing_wish_toggle(request, share_id):

@@ -19,24 +19,39 @@
 
       <main class="home-page">
         <section class="top-search">
-          <div class="search-box">
-            <input type="text" placeholder="나눔 물품 검색" />
-            <button type="button">⌕</button>
-          </div>
+          <form
+          action="{% url 'posts:share_list' %}"
+          method="get"
+          class="search-box"
+          style="width: 100%; display: flex"
+          >
+            <input
+              type="text"
+              name="q"
+              value="{{ query }}"
+              placeholder="상품 / 공구명 검색"
+            />
+     
+            <input type="hidden" name="sort" value="latest" />
+
+            <button type="submit">⌕</button>
+          </form>
           <button class="alarm-btn" type="button">♡</button>
         </section>
 
         <section class="logo-area">
-          <img
-            class="logo-img"
-            src="{% static 'app/images/logo.svg' %}"
-            alt="nona"
-          />
+          <a href="{% url 'posts:group_list' %}">
+            <img
+              class="logo-img"
+              src="{% static 'app/images/logo.svg' %}"
+              alt="nona"
+            />
+          </a>
         </section>
 
         <nav class="tab-menu">
-          <a href="{% url 'group_list' %}">공구</a>
-          <a href="{% url 'share_list' %}" class="active">나눔</a>
+          <a href="{% url 'posts:group_list' %}">공구</a>
+          <a href="{% url 'posts:share_list' %}" class="active">나눔</a>
         </nav>
 
         <section class="sort-row">
@@ -44,48 +59,59 @@
         </section>
 
         <section class="post-list">
-          <article class="post-card">
-            <div class="post-image carrot"></div>
-            <div class="post-content">
-              <span class="badge status-recruiting">나눔중</span>
-              <span class="badge green">야채</span>
-              <h2>당근 조금 나눔해요</h2>
-              <p class="price">무료나눔</p>
-              <p class="people">4개</p>
-              <div class="post-meta">
-                <span>♡ 오늘 18:30</span><span>♙ 태릉입구</span>
-              </div>
-            </div>
-            <button class="heart-btn" type="button" aria-label="찜하기">
-              ♡
-            </button>
-          </article>
+          {% for share in shares %}
+          <article
+            class="post-card"
+            onclick="location.href='{% url 'posts:share_detail' share.id %}'"
+            style="cursor: pointer"
+          >
+            <div
+              class="post-image"
+              style="background-image: url('{{ share.shareImage.first.photo.url }}');"
+            ></div>
 
-          <article class="post-card">
-            <div class="post-image tissue"></div>
             <div class="post-content">
-              <span class="badge status-closed">마감</span>
-              <span class="badge green">생활</span>
-              <h2>휴지 몇 롤 나눔합니다</h2>
+              {% if share.status == 'recruiting' %}
+                <span class="badge status-recruiting">모집중</span>
+              {% elif share.status == 'closed' %}
+                <span class="badge status-complete">마감</span>
+              {% elif share.status == 'done' %}
+                <span class="badge status-closed">완료</span>
+              {% endif %}
+              <span class="badge green">{{ share.category.name }}</span>
+              <h2>{{ share.title }}</h2>
               <p class="price">무료나눔</p>
-              <p class="people">예약 완료</p>
+              <p class="people">{{ share.quantity }}개</p>
               <div class="post-meta">
-                <span>♡ 마감</span><span>♙ 화랑대</span>
+                <span>♡ {{ share.deadline|date:"H:i" }} 마감</span>
+                <span>♙ {{ share.location }}</span>
               </div>
             </div>
-            <button class="heart-btn" type="button" aria-label="찜하기">
-              ♡
+            <button
+              class="heart-btn {% if share.id in wished_ids %}active{% endif %}"
+              type="button"
+              onclick="event.stopPropagation()"
+              data-url="{% url 'posts:sharing_wish_toggle' share.id %}"
+            >
+                {% if share.id in wished_ids %}
+                    ♥
+                {% else %}
+                    ♡
+                {% endif %}
             </button>
           </article>
+          {% empty %}
+          <p>등록된 공구 게시글이 없습니다.</p>
+          {% endfor %}
         </section>
       </main>
 
       <div class="write-menu-wrap">
         <div class="write-menu" id="writeMenu">
-          <a href="{% url 'group_create' %}" class="write-menu-item">
+          <a href="{% url 'posts:group_create' %}" class="write-menu-item">
             <span class="write-menu-icon">♧</span><span>공구 글쓰기</span>
           </a>
-          <a href="{% url 'share_create' %}" class="write-menu-item">
+          <a href="{% url 'posts:share_create' %}" class="write-menu-item">
             <span class="write-menu-icon">♨</span><span>나눔 글쓰기</span>
           </a>
         </div>
@@ -94,25 +120,26 @@
 
       <nav class="bottom-nav">
         <a href="#"><span>메시지</span></a>
-        <a href="{% url 'group_list' %}" class="active"><span>홈</span></a>
+        <a href="{% url 'posts:group_list' %}" class="active"><span>홈</span></a>
         <a href="#"><span>마이페이지</span></a>
       </nav>
 
       <div class="dimmed" id="dimmed"></div>
       <section class="bottom-sheet" id="sortSheet">
         <h3>정렬 기준</h3>
-        <button
-          class="sort-option selected"
-          type="button"
-          data-sort-label="최신순↓"
-        >
-          <span>◉ 최신순</span><strong>✓</strong>
+        <button class="sort-option {% if sort == 'latest' %}selected{% endif %}" 
+          type="button" data-sort="latest" data-sort-label="최신순↓">
+          <span>◉ 최신순</span><strong>{% if sort == 'latest' %}✓{% endif %}</strong>
         </button>
-        <button class="sort-option" type="button" data-sort-label="오래된순↓">
-          <span>◷ 오래된 순</span><strong></strong>
+
+        <button class="sort-option {% if sort == 'oldest' %}selected{% endif %}" 
+                type="button" data-sort="oldest" data-sort-label="오래된순↓">
+          <span>◷ 오래된 순</span><strong>{% if sort == 'oldest' %}✓{% endif %}</strong>
         </button>
-        <button class="sort-option" type="button" data-sort-label="마감임박순↓">
-          <span>⌛ 마감임박순</span><strong></strong>
+
+        <button class="sort-option {% if sort == 'deadline' %}selected{% endif %}" 
+                type="button" data-sort="deadline" data-sort-label="마감임박순↓">
+          <span>⌛ 마감임박순</span><strong>{% if sort == 'deadline' %}✓{% endif %}</strong>
         </button>
         <button class="cancel-btn" id="sortCloseBtn" type="button">취소</button>
       </section>

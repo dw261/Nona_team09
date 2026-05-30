@@ -6,10 +6,30 @@ const sortCloseBtn = document.getElementById("sortCloseBtn");
 const sortSheet = document.getElementById("sortSheet");
 const sortOptions = document.querySelectorAll(".sort-option");
 
+/* category bottom sheet */
+const categoryOpenBtn = document.getElementById("categoryOpenBtn");
+const categorySheet = document.getElementById("categorySheet");
+const categoryResetBtn = document.getElementById("categoryResetBtn");
+const categoryApplyBtn = document.getElementById("categoryApplyBtn");
+const categoryButtons = document.querySelectorAll(".category");
+const categorySheetOptions = document.querySelectorAll(
+  ".category-sheet-option",
+);
+const categoryInput = document.getElementById("categoryInput");
+const categorySearchInput = document.getElementById("categorySearchInput");
+
 function closeSortSheet() {
   if (sortSheet) sortSheet.classList.remove("show");
 
   if (dimmed && (!categorySheet || !categorySheet.classList.contains("show"))) {
+    dimmed.classList.remove("show");
+  }
+}
+
+function closeCategorySheet() {
+  if (categorySheet) categorySheet.classList.remove("show");
+
+  if (dimmed && (!sortSheet || !sortSheet.classList.contains("show"))) {
     dimmed.classList.remove("show");
   }
 }
@@ -25,13 +45,26 @@ if (sortCloseBtn) {
   sortCloseBtn.addEventListener("click", closeSortSheet);
 }
 
+const currentSort =
+  new URLSearchParams(window.location.search).get("sort") || "latest";
+
 sortOptions.forEach((option) => {
+  const isSelected = option.dataset.sort === currentSort;
+  option.classList.toggle("selected", isSelected);
+
+  const checkBox = option.querySelector("strong");
+  if (checkBox) checkBox.textContent = isSelected ? "✓" : "";
+
+  if (isSelected && sortOpenBtn && option.dataset.sortLabel) {
+    sortOpenBtn.textContent = option.dataset.sortLabel;
+  }
+
   option.addEventListener("click", () => {
     sortOptions.forEach((item) => {
       item.classList.remove("selected");
 
-      const checkBox = item.querySelector("strong");
-      if (checkBox) checkBox.textContent = "";
+      const itemCheckBox = item.querySelector("strong");
+      if (itemCheckBox) itemCheckBox.textContent = "";
     });
 
     option.classList.add("selected");
@@ -44,13 +77,13 @@ sortOptions.forEach((option) => {
     }
 
     if (option.dataset.sort) {
-      const url = new URL(window.location.href);
-      url.searchParams.set("sort", option.dataset.sort);
-      window.location.href = url.toString();
-      return;
-    }
+      const params = new URLSearchParams(window.location.search);
+      params.set("sort", option.dataset.sort);
 
-    closeSortSheet();
+      window.location.href = `${window.location.pathname}?${params.toString()}`;
+    } else {
+      closeSortSheet();
+    }
   });
 });
 
@@ -173,43 +206,15 @@ if (minusBtn && plusBtn && peopleRange) {
 }
 
 /* category bottom sheet */
-const categoryOpenBtn = document.getElementById("categoryOpenBtn");
-const categorySheet = document.getElementById("categorySheet");
-const categoryResetBtn = document.getElementById("categoryResetBtn");
-const categoryApplyBtn = document.getElementById("categoryApplyBtn");
-const categoryButtons = document.querySelectorAll(".category");
-const categorySheetOptions = document.querySelectorAll(
-  ".category-sheet-option",
-);
-const categoryInput = document.getElementById("categoryInput");
-
-let selectedCategory = categoryInput ? categoryInput.value : "야채";
+let selectedCategory = categoryInput ? categoryInput.value : null;
 let pendingCategory = selectedCategory;
-
-function openCategorySheet() {
-  if (!categorySheet || !dimmed) return;
-
-  pendingCategory = selectedCategory;
-  updateCategorySheetSelection(pendingCategory);
-
-  categorySheet.classList.add("show");
-  dimmed.classList.add("show");
-}
-
-function closeCategorySheet() {
-  if (categorySheet) categorySheet.classList.remove("show");
-
-  if (dimmed && (!sortSheet || !sortSheet.classList.contains("show"))) {
-    dimmed.classList.remove("show");
-  }
-}
 
 function updateCategoryChips(category) {
   categoryButtons.forEach((button) => {
     button.classList.toggle("active", button.dataset.category === category);
   });
 
-  if (categoryInput) {
+  if (categoryInput && category) {
     categoryInput.value = category;
   }
 }
@@ -226,6 +231,16 @@ function updateCategorySheetSelection(category) {
   });
 }
 
+function openCategorySheet() {
+  if (!categorySheet || !dimmed) return;
+
+  pendingCategory = selectedCategory;
+  updateCategorySheetSelection(pendingCategory);
+
+  categorySheet.classList.add("show");
+  dimmed.classList.add("show");
+}
+
 if (categoryOpenBtn) {
   categoryOpenBtn.addEventListener("click", openCategorySheet);
 }
@@ -233,7 +248,10 @@ if (categoryOpenBtn) {
 categoryButtons.forEach((button) => {
   button.addEventListener("click", () => {
     pendingCategory = button.dataset.category;
-    openCategorySheet();
+    selectedCategory = pendingCategory;
+
+    updateCategoryChips(selectedCategory);
+    updateCategorySheetSelection(selectedCategory);
   });
 });
 
@@ -246,16 +264,34 @@ categorySheetOptions.forEach((option) => {
 
 if (categoryResetBtn) {
   categoryResetBtn.addEventListener("click", () => {
-    pendingCategory = "야채";
+    pendingCategory = selectedCategory;
     updateCategorySheetSelection(pendingCategory);
   });
 }
 
 if (categoryApplyBtn) {
   categoryApplyBtn.addEventListener("click", () => {
-    selectedCategory = pendingCategory;
-    updateCategoryChips(selectedCategory);
+    if (pendingCategory) {
+      selectedCategory = pendingCategory;
+      updateCategoryChips(selectedCategory);
+    }
+
     closeCategorySheet();
+  });
+}
+
+if (categorySearchInput) {
+  categorySearchInput.addEventListener("input", () => {
+    const keyword = categorySearchInput.value.trim().toLowerCase();
+
+    categorySheetOptions.forEach((option) => {
+      const label = (
+        option.dataset.label ||
+        option.textContent ||
+        ""
+      ).toLowerCase();
+      option.style.display = label.includes(keyword) ? "" : "none";
+    });
   });
 }
 
@@ -279,18 +315,52 @@ if (titleInput && titleCount) {
   });
 }
 
-const descriptionTextarea = document.querySelector(
-  'textarea[name="description"]',
-);
+const contentTextarea = document.querySelector('textarea[name="content"]');
 const textareaCount = document.querySelector(".textarea-count");
 
-if (descriptionTextarea && textareaCount) {
-  descriptionTextarea.addEventListener("input", () => {
-    textareaCount.textContent = `${descriptionTextarea.value.length} / ${descriptionTextarea.maxLength}`;
+if (contentTextarea && textareaCount) {
+  contentTextarea.addEventListener("input", () => {
+    textareaCount.textContent = `${contentTextarea.value.length} / ${contentTextarea.maxLength}`;
   });
 }
 
 /* editable inputs */
 document.querySelectorAll(".info-input").forEach((input) => {
-  input.addEventListener("focus", () => input.select());
+  input.addEventListener("focus", () => {
+    if (input.type !== "date" && input.type !== "time") {
+      input.select();
+    }
+  });
+});
+
+/* cancel button */
+const cancelBtn = document.getElementById("cancelBtn");
+
+if (cancelBtn) {
+  cancelBtn.addEventListener("click", () => {
+    const url = cancelBtn.dataset.url;
+    if (url) window.location.href = url;
+  });
+}
+
+/* default deadline */
+document.addEventListener("DOMContentLoaded", () => {
+  const dateInput = document.getElementById("deadlineDate");
+  const timeInput = document.getElementById("deadlineTime");
+
+  if (dateInput && timeInput && !dateInput.value && !timeInput.value) {
+    const now = new Date();
+
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const formattedDate = `${year}-${month}-${day}`;
+
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const formattedTime = `${hours}:${minutes}`;
+
+    dateInput.value = formattedDate;
+    timeInput.value = formattedTime;
+  }
 });
