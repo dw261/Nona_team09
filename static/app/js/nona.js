@@ -20,6 +20,17 @@ if (sortOpenBtn && sortSheet && dimmed) {
 if (sortCloseBtn) {
   sortCloseBtn.addEventListener("click", closeSortSheet);
 }
+const currentSort = new URLSearchParams(window.location.search).get("sort") || "latest";
+
+sortOptions.forEach((option) => {
+  const isSelected = option.dataset.sort === currentSort;
+  option.classList.toggle("selected", isSelected);
+  const checkBox = option.querySelector("strong");
+  if (checkBox) checkBox.textContent = isSelected ? "✓" : "";
+  if (isSelected && sortOpenBtn && option.dataset.sortLabel) {
+    sortOpenBtn.textContent = option.dataset.sortLabel;
+  }
+});
 
 sortOptions.forEach((option) => {
   option.addEventListener("click", () => {
@@ -36,7 +47,15 @@ sortOptions.forEach((option) => {
       sortOpenBtn.textContent = option.dataset.sortLabel;
     }
 
-    closeSortSheet();
+    if (option.dataset.sort) {
+      const params = new URLSearchParams(window.location.search);
+      params.set("sort", option.dataset.sort);
+
+      window.location.href = `${window.location.pathname}?${params.toString()}`;
+
+    } else {
+      closeSortSheet();
+    }
   });
 });
 
@@ -123,8 +142,8 @@ const categorySheetOptions = document.querySelectorAll(
 );
 const categoryInput = document.getElementById("categoryInput");
 
-let selectedCategory = categoryInput ? categoryInput.value : "야채";
-let pendingCategory = selectedCategory;
+let selectedCategory = null;
+let pendingCategory = null;
 
 function openCategorySheet() {
   if (!categorySheet || !dimmed) return;
@@ -177,7 +196,7 @@ categorySheetOptions.forEach((option) => {
 
 if (categoryResetBtn) {
   categoryResetBtn.addEventListener("click", () => {
-    pendingCategory = "야채";
+    pendingCategory = null;
     updateCategorySheetSelection(pendingCategory);
   });
 }
@@ -197,8 +216,8 @@ if (dimmed) {
   });
 }
 
-updateCategoryChips(selectedCategory);
-updateCategorySheetSelection(selectedCategory);
+updateCategoryChips(null);
+updateCategorySheetSelection(null);
 
 const titleInput = document.querySelector('input[name="title"]');
 const titleCount = document.querySelector(".input-count-row span");

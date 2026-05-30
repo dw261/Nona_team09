@@ -144,8 +144,6 @@ class sharingPost(TimeStampedModel):
     trade_time = models.DateTimeField(verbose_name='거래 시간')
     deadline   = models.DateTimeField(verbose_name='모집 마감 시간')
     status     = models.CharField(max_length=20, choices=STATUS_CHOICES, default='open')
-    latitude   = models.FloatField(null=True, blank=True, verbose_name='위도')
-    longitude  = models.FloatField(null=True, blank=True, verbose_name='경도')
 
     def __str__(self):
         return self.title
@@ -155,13 +153,14 @@ class sharingPost(TimeStampedModel):
         verbose_name_plural = '나눔 목록'
 
 class SharingImage(models.Model):             # 이미지 분리
-    sharing = models.ForeignKey(sharingPost, on_delete=models.CASCADE, related_name='images')
-    photo   = models.ImageField(upload_to=upload_to_sharing)
+    sharing = models.ForeignKey(sharingPost, on_delete=models.CASCADE, related_name='shareImage')
+    photo   = models.ImageField(upload_to=upload_to_sharing, verbose_name="나눔 이미지")
     order   = models.PositiveIntegerField(default=0, verbose_name='이미지 순서')
 
     class Meta:
         ordering = ['order']
         verbose_name = '나눔 이미지'
+        verbose_name_plural = '나눔 이미지 목록'
 
 
 class SharingParticipant(TimeStampedModel):
