@@ -19,12 +19,13 @@
 
       <main class="create-page share-create-page">
         <header class="page-header">
-          <a href="{% url 'group_list' %}" class="back-btn">‹</a>
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
           <h1>나눔 개설</h1>
         </header>
 
         <form class="create-form" method="post" enctype="multipart/form-data">
           {% csrf_token %}
+
           <section class="form-card title-card">
             <label class="image-upload" data-image-upload>
               <span class="image-upload-text">사진 추가<br />(최대 5장)</span>
@@ -38,6 +39,7 @@
                 data-image-input
               />
             </label>
+
             <div class="title-input-area">
               <div class="input-count-row">
                 <input
@@ -48,11 +50,13 @@
                 />
                 <span>0 / 30</span>
               </div>
+
               <textarea
                 name="description"
                 maxlength="100"
                 placeholder="나눔 내용을 입력해주세요&#10;(필수)"
               ></textarea>
+
               <div class="textarea-count">0 / 100</div>
             </div>
           </section>
@@ -64,12 +68,14 @@
                 ⌕
               </button>
             </div>
+
             <input
               type="hidden"
               name="category"
               id="categoryInput"
               value="야채"
             />
+
             <div class="category-list">
               <button
                 type="button"
@@ -99,12 +105,14 @@
                 <h2>물건 개수 <span id="peopleSubText">최대 4개</span></h2>
                 <p>나눔 물건 수량을 입력해주세요.</p>
               </div>
+
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
                 <strong id="peopleCount">4개</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
+
             <input
               type="range"
               name="quantity"
@@ -118,9 +126,9 @@
 
           <section class="form-card info-card compact-info-card">
             <label class="info-row">
-              <span class="info-label"
-                ><span class="info-symbol">⌖</span> 거래장소</span
-              >
+              <span class="info-label">
+                <span class="info-symbol">⌖</span> 거래장소
+              </span>
               <input
                 class="info-input"
                 type="text"
@@ -128,10 +136,11 @@
                 value="태릉입구역"
               />
             </label>
+
             <label class="info-row">
-              <span class="info-label"
-                ><span class="info-symbol">◷</span> 모집 마감 시간</span
-              >
+              <span class="info-label">
+                <span class="info-symbol">◷</span> 모집 마감 시간
+              </span>
               <input
                 class="info-input"
                 type="text"
@@ -144,8 +153,8 @@
           <section class="form-card notice-card">
             <h2>ⓘ 주의사항</h2>
             <p>
-              나눔 물품 상태와 거래 장소를 꼭 확인해주세요.<br />서로 배려하는
-              따뜻한 나눔 문화를 함께 만들어가요.
+              나눔 물품 상태와 거래 장소를 꼭 확인해주세요.<br />
+              서로 배려하는 따뜻한 나눔 문화를 함께 만들어가요.
             </p>
           </section>
 
@@ -153,6 +162,81 @@
           <button class="delete-btn" type="button">취소할게요</button>
         </form>
       </main>
+
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input type="search" placeholder="카테고리 검색" />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          <button
+            class="category-sheet-option selected"
+            type="button"
+            data-category="야채"
+          >
+            <span>야채</span>
+            <strong>✓</strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="과일"
+          >
+            <span>과일</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="가구"
+          >
+            <span>가구</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="도서"
+          >
+            <span>도서</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="생활"
+          >
+            <span>생활</span>
+            <strong></strong>
+          </button>
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
     </div>
 
     <script src="{% static 'app/js/nona.js' %}"></script>

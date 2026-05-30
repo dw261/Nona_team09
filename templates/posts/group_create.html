@@ -19,7 +19,7 @@
 
       <main class="create-page">
         <header class="page-header">
-          <a href="{% url 'group_list' %}" class="back-btn">‹</a>
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
           <h1>공구 개설</h1>
         </header>
 
@@ -50,11 +50,13 @@
                 />
                 <span>0 / 30</span>
               </div>
+
               <textarea
                 name="description"
                 maxlength="100"
                 placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
               ></textarea>
+
               <div class="textarea-count">0 / 100</div>
             </div>
           </section>
@@ -66,12 +68,14 @@
                 ⌕
               </button>
             </div>
+
             <input
               type="hidden"
               name="category"
               id="categoryInput"
               value="야채"
             />
+
             <div class="category-list">
               <button
                 type="button"
@@ -101,12 +105,14 @@
                 <h2>최소 모집인원 <span id="peopleSubText">4명 모집</span></h2>
                 <p>모집인원이 모두 모이면 자동으로 마감돼요.</p>
               </div>
+
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
                 <strong id="peopleCount">4명</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
+
             <input
               type="range"
               name="min_people"
@@ -119,9 +125,9 @@
 
           <section class="form-card info-card">
             <label class="info-row">
-              <span class="info-label"
-                ><span class="info-symbol">1/N</span> 금액</span
-              >
+              <span class="info-label">
+                <span class="info-symbol">1/N</span> 금액
+              </span>
               <input
                 class="info-input"
                 type="text"
@@ -130,10 +136,11 @@
                 inputmode="numeric"
               />
             </label>
+
             <label class="info-row">
-              <span class="info-label"
-                ><span class="info-symbol">⌖</span> 거래장소</span
-              >
+              <span class="info-label">
+                <span class="info-symbol">⌖</span> 거래장소
+              </span>
               <input
                 class="info-input"
                 type="text"
@@ -141,10 +148,11 @@
                 value="태릉입구역"
               />
             </label>
+
             <label class="info-row">
-              <span class="info-label"
-                ><span class="info-symbol">◷</span> 모집 마감 시간</span
-              >
+              <span class="info-label">
+                <span class="info-symbol">◷</span> 모집 마감 시간
+              </span>
               <input
                 class="info-input"
                 type="text"
@@ -157,6 +165,7 @@
           <section class="form-card link-card">
             <h2>실제 판매 링크</h2>
             <p>실제 상품 링크를 붙여넣어주세요.</p>
+
             <div class="link-input-box">
               <span class="link-icon">↗</span>
               <input type="url" name="product_url" placeholder="https" />
@@ -168,6 +177,83 @@
           <button class="delete-btn" type="button">취소할게요</button>
         </form>
       </main>
+
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input type="search" placeholder="카테고리 검색" />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          <button
+            class="category-sheet-option selected"
+            type="button"
+            data-category="야채"
+          >
+            <span>야채</span>
+            <strong>✓</strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="과일"
+          >
+            <span>과일</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="가구"
+          >
+            <span>가구</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="도서"
+          >
+            <span>도서</span>
+            <strong></strong>
+          </button>
+
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="생활"
+          >
+            <span>생활</span>
+            <strong></strong>
+          </button>
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
     </div>
+
+    <script src="{% static 'app/js/nona.js' %}"></script>
   </body>
 </html>
