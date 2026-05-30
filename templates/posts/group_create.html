@@ -5,7 +5,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nona - 공구 개설</title>
+    <title>nona - {% if is_update %}공구 수정{% else %}공구 개설{% endif %}</title>
     <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
   </head>
 
@@ -21,7 +21,7 @@
       <main class="create-page">
         <header class="page-header">
           <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
-          <h1>공구 개설</h1>
+          <h1>{% if is_update %}공구 수정{% else %}공구 개설{% endif %}</h1>
         </header>
 
         <form class="create-form" method="post" enctype="multipart/form-data">
@@ -30,7 +30,9 @@
           <section class="form-card title-card">
             <label class="image-upload" data-image-upload>
               <span class="image-upload-text">사진 추가<br />(최대 5장)</span>
-              <img class="image-preview" alt="" hidden />
+              {% with group.groupImages.all|first as main_image %}
+                <img class="image-preview" src="{% if main_image %}{{ main_image.photo.url }}{% endif %}" alt="" {% if not main_image %}hidden{% endif %} />
+              {% endwith %}
               <input
                 type="file"
                 name="images"
@@ -48,6 +50,7 @@
                   name="title"
                   maxlength="30"
                   placeholder="공구 제목을 입력해주세요"
+                  value="{{ group.title|default:'' }}"
                 />
                 <span>0 / 30</span>
               </div>
@@ -56,7 +59,7 @@
                 name="content"
                 maxlength="100"
                 placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
-              ></textarea>
+              >{{ group.content|default:'' }}</textarea>
 
               <div class="textarea-count">0 / 100</div>
             </div>
@@ -74,14 +77,15 @@
               type="hidden"
               name="category"
               id="categoryInput"
-              value="{{ categories.0.pk }}"
+              value="{% if is_update %}{{ group.category.pk }}{% else %}{{ categories.0.pk }}{% endif %}"
             />
 
             <div class="category-list">
               {% for category in categories %}
               <button
                 type="button"
-                class="category {% if forloop.first %}active{% endif %}"
+                class="category {% if is_update %}{% if group.category.pk == category.pk %}active{% endif %}
+                                {% else %}{% if forloop.first %}active{% endif %}{% endif %}"
                 data-category="{{ category.pk }}"
                 data-label="{{ category.name }}"
               >
@@ -94,13 +98,13 @@
           <section class="form-card people-card">
             <div class="people-head">
               <div>
-                <h2>최소 모집인원 <span id="peopleSubText">2명 모집</span></h2>
+                <h2>최소 모집인원 <span id="peopleSubText">{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}명 모집</span></h2>
                 <p>모집인원이 모두 모이면 자동으로 마감돼요.</p>
               </div>
 
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
-                <strong id="peopleCount">2명</strong>
+                <strong id="peopleCount">{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}명</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
@@ -110,7 +114,7 @@
               name="min_members"
               min="2"
               max="10"
-              value="2"
+              value="{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}"
               id="peopleRange"
             />
           </section>
@@ -126,6 +130,7 @@
                 name="price_per"
                 placeholder="1/N 금액"
                 inputmode="numeric"
+                value="{{ group.price_per|default:'' }}"
               />
             </label>
 
@@ -138,6 +143,7 @@
                 type="text"
                 name="location"
                 placeholder="장소를 입력해 주세요"
+                value="{{ group.location|default:'' }}"
               />
             </label>
 
@@ -154,6 +160,7 @@
                     class="info-input"
                     type="date"
                     name="deadline_date"
+                    value="{{ group.deadline|date:'Y-m-d' }}"
                   />
                 </div>
 
@@ -164,6 +171,7 @@
                     class="info-input"
                     type="time"
                     name="deadline_time"
+                    value="{{ group.deadline|date:'H:i' }}"
                   />
                 </div>
               </div>
@@ -176,18 +184,22 @@
 
             <div class="link-input-box">
               <span class="link-icon">↗</span>
-              <input type="url" name="product_url" placeholder="https" />
+              <input type="url" name="product_url" placeholder="https" value="{{ group.link|default:'' }}" />
               <button type="button">링크 붙여넣기</button>
             </div>
           </section>
 
-          <button class="submit-btn" type="submit">공구 시작하기</button>
+          <button class="submit-btn" type="submit">
+            {% if is_update %}수정 완료하기{% else %}공구 시작하기{% endif %}
+          </button>
 
           <button
             class="delete-btn"
             type="button"
             id="cancelBtn"
-            data-url="{% url 'posts:group_list' %}"
+            data-url="{% if is_update %}{% url 'posts:group_detail' group.id %}
+                      {% else %}{% url 'posts:group_list' %}{% endif %}"
+            onclick="location.href=this.getAttribute('data-url')"
           >
             취소할게요
           </button>
@@ -217,7 +229,8 @@
             data-label="{{ category.name }}"
           >
             <span>{{ category.name }}</span>
-            <strong>{% if forloop.first %}✓{% endif %}</strong>
+            <strong>{% if is_update %}{% if group.category.pk == category.pk %}✓{% endif %}
+                    {% else %}{% if forloop.first %}✓{% endif %}{% endif %}</strong>
           </button>
           {% endfor %}
         </div>

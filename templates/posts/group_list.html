@@ -58,7 +58,7 @@
 
         <nav class="tab-menu">
           <a href="{% url 'posts:group_list' %}" class="active">공구</a>
-          <a href="{% url 'posts:shares_list' %}">나눔</a>
+          <a href="{% url 'posts:share_list' %}">나눔</a>
         </nav>
 
         <section class="sort-row">
@@ -142,7 +142,7 @@
             <span>공구 글쓰기</span>
           </a>
 
-          <a href="{% url 'posts:shares_create' %}" class="write-menu-item">
+          <a href="{% url 'posts:share_create' %}" class="write-menu-item">
             <span class="write-menu-icon">♨</span>
             <span>나눔 글쓰기</span>
           </a>

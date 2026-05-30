@@ -5,7 +5,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nona - 나눔 개설</title>
+    <title>nona - {% if is_update %}나눔 수정{% else %}나눔 개설{% endif %}</title>
     <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
   </head>
 
@@ -20,8 +20,8 @@
 
       <main class="create-page share-create-page">
         <header class="page-header">
-          <a href="{% url 'posts:shares_list' %}" class="back-btn">‹</a>
-          <h1>나눔 개설</h1>
+          <a href="{% url 'posts:share_list' %}" class="back-btn">‹</a>
+          <h1>{% if is_update %}나눔 수정{% else %}나눔 개설{% endif %}</h1>
         </header>
 
         <form class="create-form" method="post" enctype="multipart/form-data">
@@ -30,7 +30,9 @@
           <section class="form-card title-card">
             <label class="image-upload" data-image-upload>
               <span class="image-upload-text">사진 추가<br />(최대 5장)</span>
-              <img class="image-preview" alt="" hidden />
+              {% with share.shareImage.all|first as main_image %}
+                <img class="image-preview" src="{% if main_image %}{{ main_image.photo.url }}{% endif %}" alt="" {% if not main_image %}hidden{% endif %} />
+              {% endwith %}
               <input
                 type="file"
                 name="images"
@@ -48,6 +50,7 @@
                   name="title"
                   maxlength="30"
                   placeholder="나눔 제목을 입력해주세요"
+                  value="{{ share.title|default:'' }}"
                 />
                 <span>0 / 30</span>
               </div>
@@ -56,7 +59,7 @@
                 name="content"
                 maxlength="100"
                 placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
-              ></textarea>
+              >{{ share.content|default:'' }}</textarea>
 
               <div class="textarea-count">0 / 100</div>
             </div>
@@ -74,14 +77,15 @@
               type="hidden"
               name="category"
               id="categoryInput"
-              value="{{ categories.0.pk }}"
+              value="{% if is_update %}{{ share.category.pk }}{% else %}{{ categories.0.pk }}{% endif %}"
             />
 
             <div class="category-list">
               {% for category in categories %}
               <button
                 type="button"
-                class="category {% if forloop.first %}active{% endif %}"
+                class="category {% if is_update %}{% if share.category.pk == category.pk %}active{% endif %}
+                                {% else %}{% if forloop.first %}active{% endif %}{% endif %}"
                 data-category="{{ category.pk }}"
                 data-label="{{ category.name }}"
               >
@@ -94,13 +98,13 @@
           <section class="form-card people-card">
             <div class="people-head">
               <div>
-                <h2>물건 개수 <span id="peopleSubText">1개</span></h2>
+                <h2>물건 개수 <span id="peopleSubText">{% if is_update %}{{ share.quantity }}{% else %}1{% endif %}개</span></h2>
                 <p>나눔 물건 수량을 입력해주세요.</p>
               </div>
 
               <div class="people-control">
                 <button type="button" id="minusBtn">−</button>
-                <strong id="peopleCount">1개</strong>
+                <strong id="peopleCount">{% if is_update %}{{ share.quantity }}{% else %}1{% endif %}개</strong>
                 <button type="button" id="plusBtn">＋</button>
               </div>
             </div>
@@ -110,7 +114,7 @@
               name="quantity"
               min="1"
               max="4"
-              value="1"
+              value="{% if is_update %}{{ share.quantity }}{% else %}1{% endif %}"
               id="peopleRange"
               data-unit="개"
             />
@@ -126,6 +130,7 @@
                 type="text"
                 name="location"
                 placeholder="장소를 입력해 주세요"
+                value="{{ share.location|default:'' }}"
               />
             </label>
 
@@ -142,6 +147,7 @@
                     class="info-input"
                     type="date"
                     name="deadline_date"
+                    value="{{ share.deadline|date:'Y-m-d' }}"
                   />
                 </div>
 
@@ -152,6 +158,7 @@
                     class="info-input"
                     type="time"
                     name="deadline_time"
+                    value="{{ share.deadline|date:'H:i' }}"
                   />
                 </div>
               </div>
@@ -172,7 +179,9 @@
             class="delete-btn"
             type="button"
             id="cancelBtn"
-            data-url="{% url 'posts:shares_list' %}"
+            data-url="{% if is_update %}{% url 'posts:shares_detail' share.id %}
+                      {% else %}{% url 'posts:share_list' %}{% endif %}"
+            onclick="location.href=this.getAttribute('data-url')"
           >
             취소할게요
           </button>
@@ -196,13 +205,15 @@
         <div class="category-sheet-options">
           {% for category in categories %}
           <button
-            class="category-sheet-option {% if forloop.first %}selected{% endif %}"
+            class="category-sheet-option {% if is_update %}{% if share.category.pk == category.pk %}selected{% endif %}
+                                          {% else %}{% if forloop.first %}selected{% endif %}{% endif %}"
             type="button"
             data-category="{{ category.pk }}"
             data-label="{{ category.name }}"
           >
             <span>{{ category.name }}</span>
-            <strong>{% if forloop.first %}✓{% endif %}</strong>
+            <strong>{% if is_update %}{% if share.category.pk == category.pk %}✓{% endif %}
+                    {% else %}{% if forloop.first %}✓{% endif %}{%  endif %}</strong>
           </button>
           {% endfor %}
         </div>

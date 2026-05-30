@@ -117,9 +117,7 @@ def group_detail(request, group_id):
     context = {
         'group': group,
         'is_participated': is_participated,
-        'participation_count': group.groupsParticipants.filter(
-            status='approved'
-        ).count(),
+        'participation_count': group.current_members,
     }
 
     return render(request, 'posts/group_detail.html', context)
@@ -134,30 +132,37 @@ def group_update(request, group_id):
     )
 
     if request.method == 'POST':
-        group.category_id = request.POST.get('category')
-        group.title       = request.POST.get('title')
-        group.content     = request.POST.get('content')
-        group.min_members = request.POST.get('min_members')
-        group.price_per   = request.POST.get('price_per')
-        group.location    = request.POST.get('location')
-        group.deadline    = request.POST.get('deadline')
-        group.link        = request.POST.get('link', '')
-        group.save()
+        # instance=group을 넣어주면 새로 생성되지 않고 기존 글이 '수정'됩니다.
+        form = GroupPostForm(request.POST, request.FILES, instance=group)
+        if form.is_valid():
+            group = form.save(commit=False)
 
-        # 이미지 추가
-        images = request.FILES.getlist('images')
-        current_order = group.images.count()  # 기존 이미지 개수만큼 order 시작
-        for order, image in enumerate(images, start=current_order):
-            groupImage.objects.create(group=group, photo=image, order=order)
+            # 날짜 및 시간 데이터 처리
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                group.deadline = parse_datetime(f"{date_str}T{time_str}:00")
+                
+            group.save()
 
-        return redirect('posts:group_detail', pk=group.pk)
+            # 새 이미지 추가 처리
+            images = request.FILES.getlist('images')
+            current_order = group.groupImages.count()
+            for order, image in enumerate(images, start=current_order):
+                groupImage.objects.create(group=group, photo=image, order=order)
+
+            return redirect('posts:group_detail', group_id=group.pk)
+    else:
+        # 기존 글의 데이터가 입력창에 자동으로 채워집니다.
+        form = GroupPostForm(instance=group)
     
     context = {
-        'group_id': group_id,
+        'form': form, 
         'group': group,
+        'is_update': True, 
         'categories': Category.objects.all(),
     }
-    return render(request, 'posts/group_update.html', context)
+    return render(request, 'posts/group_create.html', context)
 
 # 공구 삭제 페이지
 @login_required
@@ -315,32 +320,39 @@ def shares_detail(request, share_id):
 
 # 나눔 수정 페이지
 @login_required
-@require_http_methods(["PATCH"])
 def shares_update(request, share_id):
-    share = get_object_or_404( # 본인만 수정 가능
-        sharingPost,
-        pk=share_id,
-        host=request.user,
-    )
+    share = get_object_or_404(sharingPost, pk=share_id, host=request.user)
 
-    try:
-        data = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({'error': '올바르지 않은 데이터 형식입니다.'}, status=400)
+    if request.method == 'POST':
+        form = SharingPostForm(request.POST, request.FILES, instance=share)
+        if form.is_valid():
+            share = form.save(commit=False)
 
-    if 'category' in data: share.category_id = data['category']
-    if 'title' in data: share.title = data['title']
-    if 'content' in data: share.content = data['content']
-    if 'quantity' in data: share.quantity = data['quantity']
-    if 'location' in data: share.location = data['location']
-    if 'trade_time' in data: share.trade_time = data['trade_time']
-    if 'deadline' in data: share.deadline = data['deadline']
-    share.save()
+            # 날짜 및 시간 처리
+            date_str = request.POST.get('deadline_date')
+            time_str = request.POST.get('deadline_time')
+            if date_str and time_str:
+                share.deadline = parse_datetime(f"{date_str}T{time_str}:00")
 
-    return JsonResponse({
-        'message': '나눔 수정이 완료되었습니다.',
-        'share_id': share.id
-    }, status=200)
+            share.save()
+
+            # 새 이미지 추가 처리
+            images = request.FILES.getlist('images')
+            current_order = share.shareImage.count() # 역참조 이름 매핑 확인 필수
+            for order, image in enumerate(images, start=current_order):
+                SharingImage.objects.create(sharing=share, photo=image, order=order)
+
+            return redirect('posts:shares_detail', share_id=share.pk)
+    else:
+        form = SharingPostForm(instance=share)
+
+    context = {
+        'form': form,
+        'share': share,
+        'is_update': True,
+        'categories': Category.objects.all(),
+    }
+    return render(request, 'posts/share_create.html', context)
 
 # 나눔 삭제 페이지
 @login_required
