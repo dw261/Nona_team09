@@ -11,7 +11,7 @@
 #### 1. 최신 코드 받기
 
 ```bash
-git pull origin dev
+git pull origin main
 ```
 
 #### 2. 가상환경 활성화
@@ -73,7 +73,7 @@ git checkout 브랜치명
 예시:
 
 ```bash
-git checkout dev
+git checkout main
 ```
 
 #### 현재 브랜치 확인
@@ -138,8 +138,8 @@ git push origin feature/login
 작업 중 main 브랜치가 업데이트되었을 경우:
 
 ```bash
-git checkout dev
-git pull origin dev
+git checkout main
+git pull origin main
 ```
 
 다시 작업 브랜치로 이동:
@@ -151,7 +151,7 @@ git checkout 브랜치명
 main 내용 반영:
 
 ```bash
-git merge dev
+git merge main
 ```
 
 ---
