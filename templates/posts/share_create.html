@@ -173,13 +173,15 @@
             </p>
           </section>
 
-          <button class="submit-btn" type="submit">나눔 시작하기</button>
+          <button class="submit-btn" type="submit">
+            {% if is_update %}수정 완료하기{% else %}나눔 시작하기{% endif %}
+          </button>
 
           <button
             class="delete-btn"
             type="button"
             id="cancelBtn"
-            data-url="{% if is_update %}{% url 'posts:shares_detail' share.id %}
+            data-url="{% if is_update %}{% url 'posts:share_detail' share.id %}
                       {% else %}{% url 'posts:share_list' %}{% endif %}"
             onclick="location.href=this.getAttribute('data-url')"
           >
