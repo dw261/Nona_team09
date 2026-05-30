@@ -902,3 +902,7 @@ button {
     min-height: 100vh;
   }
 }
+
+.bottom-sheet.show {
+  bottom: 0;
+}
