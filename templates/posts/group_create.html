@@ -1,0 +1,232 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 공구 개설</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="create-page">
+        <header class="page-header">
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
+          <h1>공구 개설</h1>
+        </header>
+
+        <form class="create-form" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+          <section class="form-card title-card">
+            <label class="image-upload" data-image-upload>
+              <span class="image-upload-text">사진 추가<br />(최대 5장)</span>
+              <img class="image-preview" alt="" hidden />
+              <input
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                hidden
+                data-image-input
+              />
+            </label>
+            <div class="title-input-area">
+              <div class="input-count-row">
+                <input
+                  type="text"
+                  name="title"
+                  maxlength="30"
+                  placeholder="공구 제목을 입력해주세요"
+                />
+                <span>0 / 30</span>
+              </div>
+              <textarea
+                name="content"
+                maxlength="100"
+                placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
+              ></textarea>
+              <div class="textarea-count">0 / 100</div>
+            </div>
+          </section>
+
+          <section class="form-card category-card">
+            <div class="card-title-row">
+              <h2>카테고리 <span>선택</span></h2>
+              <button type="button" class="small-icon-btn" id="categoryOpenBtn">
+                ⌕
+              </button>
+            </div>
+            <div class="category-list">
+            <input
+              type="hidden"
+              name="category"
+              id="categoryInput"
+              value="{{ categories.0.pk }}"
+            />
+
+              {% for category in categories %}
+              <button
+                type="button"
+                class="category"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
+              >
+                {{ category.name }}
+              </button>
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="form-card people-card">
+            <div class="people-head">
+              <div>
+                <h2>최소 모집인원 <span id="peopleSubText">0명 모집</span></h2>
+                <p>모집인원이 모두 모이면 자동으로 마감돼요.</p>
+              </div>
+              <div class="people-control">
+                <button type="button" id="minusBtn">−</button>
+                <strong id="peopleCount">2명</strong>
+                <button type="button" id="plusBtn">＋</button>
+              </div>
+            </div>
+            <input
+              type="range"
+              name="min_members"
+              min="2"
+              max="10"
+              value="2"
+              id="peopleRange"
+            />
+          </section>
+
+          <section class="form-card info-card">
+            <label class="info-row">
+              <span class="info-label"
+                ><span class="info-symbol">1/N</span> 금액</span
+              >
+              <input
+                class="info-input"
+                type="text"
+                name="price_per"
+                placeholder="1/N 금액"
+                inputmode="numeric"
+              />
+            </label>
+            <label class="info-row">
+              <span class="info-label"
+                ><span class="info-symbol">⌖</span> 거래장소</span
+              >
+              <input
+                class="info-input"
+                type="text"
+                name="location"
+                placeholder="장소를 입력해 주세요"
+              />
+            </label>
+            <label class="info-row">
+              <span class="info-label"
+                ><span class="info-symbol">◷</span> 모집 마감 시간</span
+              >
+              <div class="deadline-wrapper" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="min-width: 40px;">날짜:</span>
+                  <input
+                    id="deadlineDate"
+                    class="info-input"
+                    type="date"
+                    name="deadline_date"
+                    style="flex: 1;"
+                  />
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="min-width: 40px;">시각:</span>
+                  <input
+                    id="deadlineTime"
+                    class="info-input"
+                    type="time"
+                    name="deadline_time"
+                    style="flex: 1;"
+                  />
+                </div>
+              </div>
+            </label>
+          </section>
+
+          <section class="form-card link-card">
+            <h2>실제 판매 링크</h2>
+            <p>실제 상품 링크를 붙여넣어주세요.</p>
+            <div class="link-input-box">
+              <span class="link-icon">↗</span>
+              <input type="url" name="product_url" placeholder="https" />
+              <button type="button">링크 붙여넣기</button>
+            </div>
+          </section>
+
+          <button class="submit-btn" type="submit" >공구 시작하기</button>
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% url 'posts:group_list' %}"
+          >취소할게요</button>
+        </form>
+      </main>
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          {% for category in categories %}
+          <button
+            class="category-sheet-option"
+            type="button"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
+          >
+            <span>{{ category.name }}</span>
+            <strong></strong>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <script src="{% static 'app/js/nona.js' %}"></script>
+  </body>
+</html>

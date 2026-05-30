@@ -1,0 +1,167 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 공구</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="home-page">
+        <section class="top-search">
+          <form
+          action="{% url 'posts:group_list' %}"
+          method="get"
+          class="search-box"
+          style="width: 100%; display: flex"
+          >
+            <input
+              type="text"
+              name="q"
+              value="{{ query }}"
+              placeholder="상품 / 공구명 검색"
+            />
+            
+            <input type="hidden" name="sort" value="latest" />
+
+            <button type="submit">⌕</button>
+        </form>
+          <button class="alarm-btn" type="button">♡</button>
+        </section>
+
+        <section class="logo-area">
+          <a href="{% url 'posts:group_list' %}">
+            <img
+              class="logo-img"
+              src="{% static 'app/images/logo.svg' %}"
+              alt="nona"
+            />
+          </a>
+        </section>
+
+        <nav class="tab-menu">
+          <a href="{% url 'posts:group_list' %}" class="active">공구</a>
+          <a href="{% url 'posts:share_list' %}">나눔</a>
+        </nav>
+
+        <section class="sort-row">
+          <button id="sortOpenBtn" type="button">최신순↓</button>
+        </section>
+
+        <section class="post-list">
+          {% for group in groups %}
+          <article
+            class="post-card"
+            onclick="location.href='{% url 'posts:group_detail' group.id %}'"
+            style="cursor: pointer"
+          >
+            <div
+              class="post-image"
+              style="background-image: url('{{ group.groupImages.first.photo.url }}');"
+            ></div>
+
+            <div class="post-content">
+              {% if group.status == 'recruiting' %}
+                <span class="badge status-recruiting">모집중</span>
+              {% elif group.status == 'closed' %}
+                <span class="badge status-complete">마감</span>
+              {% elif group.status == 'done' %}
+                <span class="badge status-closed">완료</span>
+              {% endif %}
+              <span class="badge green">{{ group.category.name }}</span>
+
+              <h2>{{ group.title }}</h2>
+              <p class="price">{{ group.price_per }}원</p>
+              <p class="people">
+                {{ group.current_members }} / {{ group.min_members }}명 참여중
+              </p>
+
+              <div class="progress">
+                <span style="width: 75%"></span>
+              </div>
+
+              <div class="post-meta">
+                <span>♡ {{ group.deadline|date:"H:i" }} 마감</span>
+                <span>♙ {{ group.location }}</span>
+              </div>
+            </div>
+            <button
+              class="heart-btn {% if group.id in wished_ids %}active{% endif %}"
+              type="button"
+              data-url="{% url 'posts:group_wish_toggle' group.id %}"
+            >
+                {% if group.id in wished_ids %}
+                    ♥
+                {% else %}
+                    ♡
+                {% endif %}
+            </button>
+          </article>
+          {% empty %}
+          <p>등록된 공구 게시글이 없습니다.</p>
+          {% endfor %}
+        </section>
+      </main>
+
+      <div class="write-menu-wrap">
+        <div class="write-menu" id="writeMenu">
+          <a href="{% url 'posts:group_create' %}" class="write-menu-item">
+            <span class="write-menu-icon">♧</span><span>공구 글쓰기</span>
+          </a>
+          <a href="{% url 'posts:share_create' %}" class="write-menu-item">
+            <span class="write-menu-icon">♨</span><span>나눔 글쓰기</span>
+          </a>
+        </div>
+        <button class="floating-btn" id="writeOpenBtn" type="button">＋</button>
+      </div>
+
+      <nav class="bottom-nav">
+        <a href="#"><span>메시지</span></a>
+        <a href="{% url 'posts:group_list' %}" class="active"><span>홈</span></a>
+        <a href="#"><span>마이페이지</span></a>
+      </nav>
+
+      <div class="dimmed" id="dimmed"></div>
+      <section class="bottom-sheet" id="sortSheet">
+        <h3>정렬 기준</h3>
+        <button class="sort-option {% if current_sort == 'latest' %}selected{% endif %}"
+          type="button" data-sort="latest" data-sort-label="최신순↓">
+          <span>◉ 최신순</span><strong>{% if current_sort == 'latest' %}✓{% endif %}</strong>
+        </button>
+
+        <button class="sort-option {% if current_sort == 'oldest' %}selected{% endif %}"
+                type="button" data-sort="oldest" data-sort-label="오래된순↓">
+          <span>◷ 오래된 순</span><strong>{% if current_sort == 'oldest' %}✓{% endif %}</strong>
+        </button>
+
+        <button class="sort-option {% if current_sort == 'deadline' %}selected{% endif %}"
+                type="button" data-sort="deadline" data-sort-label="마감임박순↓">
+          <span>⌛ 마감임박순</span><strong>{% if current_sort == 'deadline' %}✓{% endif %}</strong>
+        </button>
+
+        <button class="sort-option {% if current_sort == 'price_low' %}selected{% endif %}"
+                type="button" data-sort="price_low" data-sort-label="가격 낮은순↓">
+          <span>↓ 가격 낮은 순</span><strong>{% if current_sort == 'price_low' %}✓{% endif %}</strong>
+        </button>
+
+        <button class="sort-option {% if current_sort == 'price_high' %}selected{% endif %}"
+                type="button" data-sort="price_high" data-sort-label="가격 높은순↓">
+          <span>↑ 가격 높은 순</span><strong>{% if current_sort == 'price_high' %}✓{% endif %}</strong>
+        </button>
+        <button class="cancel-btn" id="sortCloseBtn" type="button">취소</button>
+      </section>
+    </div>
+
+    <script src="{% static 'app/js/nona.js' %}"></script>
+  </body>
+</html>
