@@ -1,0 +1,51 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 마이페이지</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="detail-page">
+        <header class="page-header detail-header">
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
+          <h1>마이페이지</h1>
+        </header>
+
+        <section class="detail-card detail-summary-card">
+          <div class="seller-avatar">{{ request.user.username|slice:":1" }}</div>
+          <div class="detail-summary">
+            <span class="detail-category">USER</span>
+            <h2>{{ request.user.profile.nickname|default:request.user.username }}</h2>
+            <p>{{ request.user.profile.phone_number|default:"전화번호 미등록" }}</p>
+            <p>{{ request.user.profile.address|default:"주소 미지정" }}</p>
+          </div>
+        </section>
+
+        <section class="detail-card progress-card">
+          <div class="detail-section-head">
+            <h2>신뢰도</h2>
+            <strong>{{ request.user.profile.reliability|default:"70" }}%</strong>
+          </div>
+          <p>거래 내역과 평가 기능은 추후 연결 예정입니다.</p>
+        </section>
+
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button class="submit-btn" type="submit">로그아웃</button>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>
