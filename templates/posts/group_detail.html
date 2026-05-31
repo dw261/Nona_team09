@@ -27,13 +27,16 @@
         </header>
 
         <section class="detail-card detail-summary-card">
-          {% with group.groupImages.all|first as main_image %}
-            {% if main_image %}
-              <div class="detail-thumb" style="background-image: url('{{ main_image.photo.url }}'); background-size: cover;"></div>
-            {% else %}
-              <div class="detail-thumb carrot"></div>
-            {% endif %}
-          {% endwith %}
+          {% with group.groupImages.all|first as main_image %} {% if main_image
+          %}
+          <div
+            class="detail-thumb"
+            style="background-image: url('{{ main_image.photo.url }}'); background-size: cover;"
+          ></div>
+          {% else %}
+          <div class="detail-thumb carrot"></div>
+          {% endif %} {% endwith %}
+
           <div class="detail-summary">
             <span class="detail-category">{{ group.category.name }}</span>
             <h2>{{ group.title }}</h2>
@@ -43,7 +46,9 @@
               <div class="seller-avatar">○</div>
               <div>
                 <strong>{{ group.host.username }}</strong>
-                <span>{{ group.host.profile.address|default:"주소 미지정" }}</span>
+                <span
+                  >{{ group.host.profile.address|default:"주소 미지정" }}</span
+                >
               </div>
               <em>신뢰도 {{ group.host.profile.reliability|default:"70" }}%</em>
             </div>
@@ -53,20 +58,22 @@
         <section class="detail-card progress-card">
           <div class="detail-section-head">
             <h2>진행상황</h2>
-            <strong>{{ group.current_members }}/{{ group.min_members }}명</strong>
+            <strong
+              >{{ group.current_members }}/{{ group.min_members }}명</strong
+            >
           </div>
+
           <div class="detail-progress">
-            <span style="width: {% widthratio group.current_members group.min_members 100 %}%"></span>
+            <span
+              style="width: {% widthratio group.current_members group.min_members 100 %}%"
+            ></span>
             <i></i>
           </div>
+
           <p>
-            {% if group.status == 'recruiting' %}
-              같이 참여할 사람을 기다리고 있어요
-            {% elif group.status == 'closed' %}
-              모집이 마감된 공구입니다.
-            {% else %}
-              완료된 거래입니다.
-            {% endif %}
+            {% if group.status == 'recruiting' %} 같이 참여할 사람을 기다리고
+            있어요 {% elif group.status == 'closed' %} 모집이 마감된 공구입니다.
+            {% else %} 완료된 거래입니다. {% endif %}
           </p>
         </section>
 
@@ -89,9 +96,12 @@
         <section class="detail-card sale-link-card">
           <h2>실제 판매 페이지</h2>
           <p>공동구매 상품의 오리지널 링크입니다.</p>
+
           <div class="detail-link-box">
             <span>↗</span>
-            <a href="{{ group.link }}" target="_blank" rel="noreferrer">판매 사이트 열기</a>
+            <a href="{{ group.link }}" target="_blank" rel="noreferrer">
+              판매 사이트 열기
+            </a>
           </div>
         </section>
         {% endif %}
@@ -99,41 +109,68 @@
         <section class="detail-card share-card-box">
           <h2>링크 공유</h2>
           <p>링크를 공유하면 더 많은 분들이 쉽게 참여할 수 있어요!</p>
+
           <div class="detail-link-box">
             <span>↗</span>
-            <input type="text" value="{{ request.build_absolute_uri }}" readonly />
+            <input
+              type="text"
+              value="{{ request.build_absolute_uri }}"
+              readonly
+            />
           </div>
+
           <div class="share-actions">
             <button type="button"><span>●</span>카카오톡</button>
             <button type="button"><span>◎</span>인스타그램</button>
-            <button 
-            type="button"
-            onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}');
-            alert('링크가 복사되었습니다!');">
-            <span>↗</span>링크복사</button>
+            <button
+              type="button"
+              onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); alert('링크가 복사되었습니다!');"
+            >
+              <span>↗</span>링크복사
+            </button>
             <button type="button"><span>…</span>더보기</button>
           </div>
         </section>
       </main>
 
       <footer class="detail-bottom-actions">
-        <button class="detail-like-btn heart-btn" type="button" id="wish-toggle-btn" data-group-id="{{ group.id }}">
-          ♡ <span>12</span>
+        <button
+          class="detail-like-btn heart-btn"
+          type="button"
+          id="wish-toggle-btn"
+          data-group-id="{{ group.id }}"
+        >
+          <span class="heart-icon">♡</span>
+          <span class="heart-count">12</span>
         </button>
-        
+
         {% if group.host == request.user %}
-          <button class="detail-join-btn" type="button" onclick="location.href='{% url 'posts:group_update' group.id %}'" style="background-color: #afbb78;">
-            수정하기
-          </button>
+        <button
+          class="detail-join-btn"
+          type="button"
+          onclick="location.href='{% url 'posts:group_update' group.id %}'"
+          style="background-color: #afbb78"
+        >
+          수정하기
+        </button>
         {% elif is_participated %}
-          <button class="detail-join-btn" type="button" onclick="location.href='{% url 'chat:room' group.id %}'" style="background-color: #8e995e;">
-            채팅방 이동
-          </button>
+        <button
+          class="detail-join-btn"
+          type="button"
+          onclick="location.href='{% url 'chat:room' group.id %}'"
+          style="background-color: #8e995e"
+        >
+          채팅방 이동
+        </button>
         {% else %}
-          <form action="{% url 'posts:group_participate' group.id %}" method="POST" style="flex: 1; display: flex;">
-            {% csrf_token %}
-            <button class="detail-join-btn" type="submit">참여하기</button>
-          </form>
+        <form
+          action="{% url 'posts:group_participate' group.id %}"
+          method="POST"
+          style="display: contents"
+        >
+          {% csrf_token %}
+          <button class="detail-join-btn" type="submit">참여하기</button>
+        </form>
         {% endif %}
       </footer>
 
