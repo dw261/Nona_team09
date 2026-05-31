@@ -1,0 +1,107 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 나눔 게시글</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="detail-page share-detail-page">
+        <header class="page-header detail-header">
+          <a href="{% url 'posts:share_list' %}" class="back-btn">‹</a>
+          <h1>나눔 게시글</h1>
+          <button class="detail-menu-btn" type="button" aria-label="더보기">
+            ☰
+          </button>
+        </header>
+
+        <section class="detail-card detail-summary-card share-summary-card">
+          <div class="detail-thumb egg"></div>
+          <div class="detail-summary">
+            <span class="detail-category">야채</span>
+            <h2>남은 달걀 10개 나눔해요</h2>
+            <p>어제 구매해서 유통기한 넉넉해요</p>
+
+            <div class="seller-row">
+              <div class="seller-avatar">○</div>
+              <div>
+                <strong>신다연</strong>
+                <span>서울특별시 노원구</span>
+              </div>
+              <em>신뢰도 70%</em>
+            </div>
+          </div>
+        </section>
+
+        <section class="detail-card progress-card share-quantity-card">
+          <div class="detail-section-head">
+            <h2>나눔 수량</h2>
+            <strong>2/4개</strong>
+          </div>
+          <div class="detail-progress share-quantity-progress">
+            <span style="width: 50%"></span>
+            <i></i>
+          </div>
+          <p>실시간으로 나눔 수량이 줄어들고 있어요!</p>
+        </section>
+
+        <section class="detail-card detail-info-card share-info-card">
+          <div class="detail-info-row">
+            <span><i>◷</i> 희망 거래시간</span>
+            <strong>오늘 18 : 30</strong>
+          </div>
+          <div class="detail-info-row">
+            <span><i>◷</i> 모집 마감 시간</span>
+            <strong>오늘 18 : 30</strong>
+          </div>
+          <div class="detail-info-row">
+            <span><i>⌖</i> 희망 거래 장소</span>
+            <strong>태릉입구역 ›</strong>
+          </div>
+        </section>
+
+        <section class="detail-card share-card-box share-detail-link-card">
+          <h2>링크 공유</h2>
+          <p>링크를 공유하면 더 많은 분들이 쉽게 참여할 수 있어요!</p>
+          <div class="detail-link-box">
+            <span>↗</span>
+            <input type="text" value="https" readonly />
+          </div>
+          <div class="share-actions">
+            <button type="button"><span>●</span>카카오톡</button>
+            <button type="button"><span>◎</span>인스타그램</button>
+            <button type="button"><span>↗</span>링크복사</button>
+            <button type="button"><span>…</span>더보기</button>
+          </div>
+        </section>
+
+        <section class="detail-card share-detail-notice-card">
+          <h2>ⓘ 주의사항</h2>
+          <p>나눔 물품 상태와 거래 장소를 꼭 확인해주세요.</p>
+        </section>
+      </main>
+
+      <footer class="detail-bottom-actions">
+        <button class="detail-like-btn detail-heart-btn" type="button">
+          ♡ <span>12</span>
+        </button>
+        <button class="detail-join-btn" type="button">참여하기</button>
+      </footer>
+
+      <div class="home-indicator"></div>
+    </div>
+
+    <script src="{% static 'app/js/nona.js' %}"></script>
+  </body>
+</html>
