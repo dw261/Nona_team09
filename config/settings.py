@@ -27,15 +27,20 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
+LOGIN_URL = '/admin/login/'  # 일단 admin 로그인 페이지로 임시 연결
+
 # Application definition
 
 INSTALLED_APPS = [
+    'chat',
+    'posts',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -64,6 +69,17 @@ TEMPLATES = [
         },
     },
 ]
+
+
+# Channels 설정
+ASGI_APPLICATION = 'config.asgi.application'
+
+# Channels 레이어(메모리 백엔드, 개발용)
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
@@ -118,5 +134,8 @@ STATICFILES_DIRS = [BASE_DIR / "static"] # 루트의 공통 static/ 폴더 경�
 
 # collectstatic 실행 시 모을 경로 (배포 시 필요)
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+MEDIA_URL = 'media/' # URL에서 미디어 파일 접근 경로
+MEDIA_ROOT = BASE_DIR / 'media' # 실제 미디어 파일 저장 경로
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

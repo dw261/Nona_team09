@@ -1,0 +1,260 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - {% if is_update %}공구 수정{% else %}공구 개설{% endif %}</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="create-page">
+        <header class="page-header">
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
+          <h1>{% if is_update %}공구 수정{% else %}공구 개설{% endif %}</h1>
+        </header>
+
+        <form class="create-form" method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <section class="form-card title-card">
+            <label class="image-upload" data-image-upload>
+              <span class="image-upload-text">사진 추가<br />(최대 5장)</span>
+              {% with group.groupImages.all|first as main_image %}
+                <img class="image-preview" src="{% if main_image %}{{ main_image.photo.url }}{% endif %}" alt="" {% if not main_image %}hidden{% endif %} />
+              {% endwith %}
+              <input
+                type="file"
+                name="images"
+                accept="image/*"
+                multiple
+                hidden
+                data-image-input
+              />
+            </label>
+
+            <div class="title-input-area">
+              <div class="input-count-row">
+                <input
+                  type="text"
+                  name="title"
+                  maxlength="30"
+                  placeholder="공구 제목을 입력해주세요"
+                  value="{{ group.title|default:'' }}"
+                />
+                <span>0 / 30</span>
+              </div>
+
+              <textarea
+                name="content"
+                maxlength="100"
+                placeholder="유통기한과 구매상태를 입력해주세요&#10;(필수)"
+              >{{ group.content|default:'' }}</textarea>
+
+              <div class="textarea-count">0 / 100</div>
+            </div>
+          </section>
+
+          <section class="form-card category-card">
+            <div class="card-title-row">
+              <h2>카테고리 <span>선택</span></h2>
+              <button type="button" class="small-icon-btn" id="categoryOpenBtn">
+                ⌕
+              </button>
+            </div>
+
+            <input
+              type="hidden"
+              name="category"
+              id="categoryInput"
+              value="{% if is_update %}{{ group.category.pk }}{% else %}{{ categories.0.pk }}{% endif %}"
+            />
+
+            <div class="category-list">
+              {% for category in categories %}
+              <button
+                type="button"
+                class="category {% if is_update %}{% if group.category.pk == category.pk %}active{% endif %}
+                                {% else %}{% if forloop.first %}active{% endif %}{% endif %}"
+                data-category="{{ category.pk }}"
+                data-label="{{ category.name }}"
+              >
+                {{ category.name }}
+              </button>
+              {% endfor %}
+            </div>
+          </section>
+
+          <section class="form-card people-card">
+            <div class="people-head">
+              <div>
+                <h2>최소 모집인원 <span id="peopleSubText">{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}명 모집</span></h2>
+                <p>모집인원이 모두 모이면 자동으로 마감돼요.</p>
+              </div>
+
+              <div class="people-control">
+                <button type="button" id="minusBtn">−</button>
+                <strong id="peopleCount">{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}명</strong>
+                <button type="button" id="plusBtn">＋</button>
+              </div>
+            </div>
+
+            <input
+              type="range"
+              name="min_members"
+              min="2"
+              max="10"
+              value="{% if is_update %}{{ group.min_members }}{% else %}2{% endif %}"
+              id="peopleRange"
+            />
+          </section>
+
+          <section class="form-card info-card">
+            <label class="info-row">
+              <span class="info-label">
+                <span class="info-symbol">1/N</span> 금액
+              </span>
+              <input
+                class="info-input"
+                type="text"
+                name="price_per"
+                placeholder="1/N 금액"
+                inputmode="numeric"
+                value="{{ group.price_per|default:'' }}"
+              />
+            </label>
+
+            <label class="info-row">
+              <span class="info-label">
+                <span class="info-symbol">⌖</span> 거래장소
+              </span>
+              <input
+                class="info-input"
+                type="text"
+                name="location"
+                placeholder="장소를 입력해 주세요"
+                value="{{ group.location|default:'' }}"
+              />
+            </label>
+
+            <label class="info-row deadline-row">
+              <span class="info-label">
+                <span class="info-symbol">◷</span> 모집 마감 시간
+              </span>
+
+              <div class="deadline-wrapper">
+                <div class="deadline-input-row">
+                  <span>날짜</span>
+                  <input
+                    id="deadlineDate"
+                    class="info-input"
+                    type="date"
+                    name="deadline_date"
+                    value="{{ group.deadline|date:'Y-m-d' }}"
+                  />
+                </div>
+
+                <div class="deadline-input-row">
+                  <span>시각</span>
+                  <input
+                    id="deadlineTime"
+                    class="info-input"
+                    type="time"
+                    name="deadline_time"
+                    value="{{ group.deadline|date:'H:i' }}"
+                  />
+                </div>
+              </div>
+            </label>
+          </section>
+
+          <section class="form-card link-card">
+            <h2>실제 판매 링크</h2>
+            <p>실제 상품 링크를 붙여넣어주세요.</p>
+
+            <div class="link-input-box">
+              <span class="link-icon">↗</span>
+              <input type="url" name="product_url" placeholder="https" value="{{ group.link|default:'' }}" />
+              <button type="button">링크 붙여넣기</button>
+            </div>
+          </section>
+
+          <button class="submit-btn" type="submit">
+            {% if is_update %}수정 완료하기{% else %}공구 시작하기{% endif %}
+          </button>
+
+          <button
+            class="delete-btn"
+            type="button"
+            id="cancelBtn"
+            data-url="{% if is_update %}{% url 'posts:group_detail' group.id %}
+                      {% else %}{% url 'posts:group_list' %}{% endif %}"
+            onclick="location.href=this.getAttribute('data-url')"
+          >
+            취소할게요
+          </button>
+        </form>
+      </main>
+
+      <div class="dimmed" id="dimmed"></div>
+
+      <section class="bottom-sheet category-bottom-sheet" id="categorySheet">
+        <h3>카테고리 선택</h3>
+
+        <label class="category-search">
+          <input
+            type="search"
+            placeholder="카테고리 검색"
+            id="categorySearchInput"
+          />
+          <span>⌕</span>
+        </label>
+
+        <div class="category-sheet-options">
+          {% for category in categories %}
+          <button
+            class="category-sheet-option {% if forloop.first %}selected{% endif %}"
+            type="button"
+            data-category="{{ category.pk }}"
+            data-label="{{ category.name }}"
+          >
+            <span>{{ category.name }}</span>
+            <strong>{% if is_update %}{% if group.category.pk == category.pk %}✓{% endif %}
+                    {% else %}{% if forloop.first %}✓{% endif %}{% endif %}</strong>
+          </button>
+          {% endfor %}
+        </div>
+
+        <div class="category-sheet-actions">
+          <button
+            class="category-reset-btn"
+            id="categoryResetBtn"
+            type="button"
+          >
+            초기화
+          </button>
+
+          <button
+            class="category-apply-btn"
+            id="categoryApplyBtn"
+            type="button"
+          >
+            적용하기
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <script src="{% static 'app/js/nona.js' %}"></script>
+  </body>
+</html>
