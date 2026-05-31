@@ -13,13 +13,13 @@
       <header class="status-bar">
         <span>12:00</span>
         <div class="status-icons">
-          <span>▮</span><span>⌁</span><span>▭</span>
+          <span>|</span><span>⌁</span><span>▭</span>
         </div>
       </header>
 
       <main class="detail-page">
         <header class="page-header detail-header">
-          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
+          <a href="{% url 'posts:group_list' %}" class="back-btn">&lt;</a>
           <h1>마이페이지</h1>
         </header>
 
@@ -29,8 +29,16 @@
             <span class="detail-category">USER</span>
             <h2>{{ request.user.profile.nickname|default:request.user.username }}</h2>
             <p>{{ request.user.profile.phone_number|default:"전화번호 미등록" }}</p>
-            <p>{{ request.user.profile.address|default:"주소 미지정" }}</p>
+            <p id="profileAddress">{{ request.user.profile.address|default:"주소 미지정" }}</p>
           </div>
+        </section>
+
+        <section class="detail-card progress-card">
+          <div class="detail-section-head">
+            <h2>지역 인증</h2>
+            <strong id="regionStatus">{% if request.user.profile.is_region_verified %}완료{% else %}미완료{% endif %}</strong>
+          </div>
+          <p id="regionMessage">{{ request.user.profile.region|default:"현재 위치로 동네를 인증해 주세요." }}</p>
         </section>
 
         <section class="detail-card progress-card">
@@ -41,11 +49,73 @@
           <p>거래 내역과 평가 기능은 추후 연결 예정입니다.</p>
         </section>
 
+        <button class="submit-btn" id="regionVerifyBtn" type="button">지역 인증하기</button>
+
         <form method="post" action="{% url 'accounts:logout' %}">
           {% csrf_token %}
           <button class="submit-btn" type="submit">로그아웃</button>
         </form>
       </main>
     </div>
+
+    <script>
+      const regionVerifyBtn = document.getElementById("regionVerifyBtn");
+      const regionStatus = document.getElementById("regionStatus");
+      const regionMessage = document.getElementById("regionMessage");
+      const profileAddress = document.getElementById("profileAddress");
+
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+
+      regionVerifyBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          regionMessage.textContent = "이 브라우저에서는 위치 인증을 사용할 수 없습니다.";
+          return;
+        }
+
+        regionVerifyBtn.disabled = true;
+        regionVerifyBtn.textContent = "인증 중...";
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              const response = await fetch("{% url 'accounts:verify_region' %}", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                }),
+              });
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.error || "지역 인증에 실패했습니다.");
+              }
+
+              regionStatus.textContent = "완료";
+              regionMessage.textContent = data.region || "지역 인증 완료";
+              profileAddress.textContent = data.address || "주소 확인 완료";
+            } catch (error) {
+              regionMessage.textContent = error.message;
+            } finally {
+              regionVerifyBtn.disabled = false;
+              regionVerifyBtn.textContent = "지역 인증하기";
+            }
+          },
+          () => {
+            regionMessage.textContent = "위치 권한을 허용해야 지역 인증이 가능합니다.";
+            regionVerifyBtn.disabled = false;
+            regionVerifyBtn.textContent = "지역 인증하기";
+          }
+        );
+      });
+    </script>
   </body>
 </html>
