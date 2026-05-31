@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
 from .forms import LoginForm, SignupForm
 from .models import Profile
@@ -63,16 +64,17 @@ def mypage(request):
 
 
 @login_required
+@require_POST
 def verify_region(request):
-    if request.method != 'POST':
-        return JsonResponse({'error': 'POST 요청만 가능합니다.'}, status=405)
-
     try:
         payload = json.loads(request.body.decode('utf-8'))
         latitude = float(payload.get('latitude'))
         longitude = float(payload.get('longitude'))
     except (TypeError, ValueError, json.JSONDecodeError):
         return JsonResponse({'error': '위도와 경도 값이 올바르지 않습니다.'}, status=400)
+
+    if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+        return JsonResponse({'error': '위도 또는 경도 범위가 올바르지 않습니다.'}, status=400)
 
     if not settings.KAKAO_REST_API_KEY:
         return JsonResponse({'error': 'Kakao REST API 키가 설정되지 않았습니다.'}, status=500)
