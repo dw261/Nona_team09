@@ -1255,7 +1255,6 @@ button {
 }
 
 /* share detail */
-
 .detail-thumb.egg {
   background:
     radial-gradient(circle at 32% 62%, #fff7d8 0 13%, transparent 14%),
@@ -1312,4 +1311,25 @@ button {
   font-weight: 300;
   line-height: 14px;
   letter-spacing: -0.43px;
+
+.auth-card {
+  padding: 0 12px;
+}
+
+.auth-card .info-row {
+  min-height: 54px;
+  height: auto;
+}
+
+.auth-card ul,
+.auth-error-card ul {
+  margin: 8px 0;
+  padding-left: 18px;
+  color: #d15b45;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.auth-error-card {
+  padding: 12px;
 }
