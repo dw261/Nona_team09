@@ -1254,6 +1254,64 @@ button {
   background: #454545;
 }
 
+/* share detail */
+.detail-thumb.egg {
+  background:
+    radial-gradient(circle at 32% 62%, #fff7d8 0 13%, transparent 14%),
+    radial-gradient(circle at 66% 38%, #fff3ca 0 15%, transparent 16%),
+    radial-gradient(circle at 62% 68%, #f6dca2 0 16%, transparent 17%),
+    linear-gradient(145deg, #9a7a43, #eee1bf);
+}
+
+.share-detail-page {
+  padding-bottom: 86px;
+}
+
+.share-summary-card .detail-summary h2 {
+  margin-top: 7px;
+}
+
+.share-quantity-card {
+  height: 101px;
+}
+
+.share-quantity-progress i {
+  left: 49%;
+}
+
+.share-info-card {
+  height: 163px;
+}
+
+.share-info-card .detail-info-row {
+  height: 54px;
+}
+
+.share-detail-link-card {
+  height: 123px;
+}
+
+.share-detail-notice-card {
+  height: 57px;
+  padding: 9px 18px;
+}
+
+.share-detail-notice-card h2 {
+  margin: 0 0 4px;
+  color: #505635;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 16px;
+}
+
+.share-detail-notice-card p {
+  margin: 0;
+  color: #727a4c;
+  font-size: 8px;
+  font-weight: 300;
+  line-height: 14px;
+  letter-spacing: -0.43px;
+
 .auth-card {
   padding: 0 12px;
 }

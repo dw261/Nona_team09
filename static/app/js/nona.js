@@ -110,8 +110,18 @@ document.querySelectorAll(".heart-btn").forEach((button) => {
     event.preventDefault();
     event.stopPropagation();
 
+    const iconTarget = button.querySelector(".heart-icon") || button;
+    const countTarget = button.querySelector(".heart-count");
+
     button.classList.toggle("active");
-    button.textContent = button.classList.contains("active") ? "♥" : "♡";
+    iconTarget.textContent = button.classList.contains("active") ? "♥" : "♡";
+
+    if (countTarget) {
+      const currentCount = Number(countTarget.textContent || 0);
+      countTarget.textContent = button.classList.contains("active")
+        ? currentCount + 1
+        : Math.max(currentCount - 1, 0);
+    }
 
     const url = button.dataset.url;
     if (!url) return;
@@ -126,7 +136,14 @@ document.querySelectorAll(".heart-btn").forEach((button) => {
       });
     } catch (error) {
       button.classList.toggle("active");
-      button.textContent = button.classList.contains("active") ? "♥" : "♡";
+      iconTarget.textContent = button.classList.contains("active") ? "♥" : "♡";
+
+      if (countTarget) {
+        const currentCount = Number(countTarget.textContent || 0);
+        countTarget.textContent = button.classList.contains("active")
+          ? currentCount + 1
+          : Math.max(currentCount - 1, 0);
+      }
     }
   });
 });
@@ -136,6 +153,7 @@ function getCookie(name) {
 
   for (const cookie of cookies) {
     const trimmed = cookie.trim();
+
     if (trimmed.startsWith(`${name}=`)) {
       return decodeURIComponent(trimmed.slice(name.length + 1));
     }
@@ -290,6 +308,7 @@ if (categorySearchInput) {
         option.textContent ||
         ""
       ).toLowerCase();
+
       option.style.display = label.includes(keyword) ? "" : "none";
     });
   });
@@ -315,7 +334,9 @@ if (titleInput && titleCount) {
   });
 }
 
-const contentTextarea = document.querySelector('textarea[name="content"]');
+const contentTextarea = document.querySelector(
+  'textarea[name="content"], textarea[name="description"]',
+);
 const textareaCount = document.querySelector(".textarea-count");
 
 if (contentTextarea && textareaCount) {
