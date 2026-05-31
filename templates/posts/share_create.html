@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nona - {% if is_update %}나눔 수정{% else %}나눔 개설{% endif %}</title>
-    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
   </head>
 
   <body>
@@ -173,13 +173,15 @@
             </p>
           </section>
 
-          <button class="submit-btn" type="submit">나눔 시작하기</button>
+          <button class="submit-btn" type="submit">
+            {% if is_update %}수정 완료하기{% else %}나눔 시작하기{% endif %}
+          </button>
 
           <button
             class="delete-btn"
             type="button"
             id="cancelBtn"
-            data-url="{% if is_update %}{% url 'posts:shares_detail' share.id %}
+            data-url="{% if is_update %}{% url 'posts:share_detail' share.id %}
                       {% else %}{% url 'posts:share_list' %}{% endif %}"
             onclick="location.href=this.getAttribute('data-url')"
           >
@@ -238,6 +240,6 @@
       </section>
     </div>
 
-    <script src="{% static 'app/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/nona.js' %}"></script>
   </body>
 </html>

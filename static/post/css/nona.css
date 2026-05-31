@@ -1241,6 +1241,8 @@ button {
 }
 
 .detail-join-btn {
+  flex: 1;
+  width: 100%;
   background: #afbb78;
 }
 
@@ -1280,11 +1282,18 @@ button {
 }
 
 .share-info-card {
-  height: 163px;
+  height: 132px; 
+  padding: 12px 12px; /* 상하 여백을 주어 카드가 꽉 차 보이게 만듭니다 */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 .share-info-card .detail-info-row {
   height: 54px;
+}
+.share-info-card .detail-info-row:last-child {
+  border-bottom: none;
 }
 
 .share-detail-link-card {
@@ -1311,7 +1320,7 @@ button {
   font-weight: 300;
   line-height: 14px;
   letter-spacing: -0.43px;
-
+}
 .auth-card {
   padding: 0 12px;
 }

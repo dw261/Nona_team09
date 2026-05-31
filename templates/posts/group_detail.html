@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nona - 공구 게시물</title>
-    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
   </head>
   <body>
     <div class="mobile-wrap">
@@ -21,9 +21,10 @@
         <header class="page-header detail-header">
           <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
           <h1>공구 게시물</h1>
-          <button class="detail-menu-btn" type="button" aria-label="더보기">
-            ☰
-          </button>
+          {% if request.user == group.host %}
+            <button class="detail-menu-btn delete-btn" type="button" aria-label="삭제" 
+                    data-id="{{ group.id }}" data-type="group"></button>
+          {% endif %}
         </header>
 
         <section class="detail-card detail-summary-card">
@@ -117,8 +118,15 @@
       </main>
 
       <footer class="detail-bottom-actions">
-        <button class="detail-like-btn heart-btn" type="button" id="wish-toggle-btn" data-group-id="{{ group.id }}">
-          ♡ <span>12</span>
+        <button class="detail-like-btn heart-btn {% if is_wished %}active{% endif %}"
+          type="button"
+          id="wish-toggle-btn"
+          data-group-id="{{ group.id }}"
+          data-url="{% url 'posts:group_wish_toggle' group.id %}"
+          data-login-url="{% url 'accounts:login' %}"
+          {% if request.user.is_authenticated %}data-authenticated="true"{% endif %}>
+          <span class="heart-icon">{% if is_wished %}♥{% else %}♡{% endif %}</span>
+          <span class="heart-count">{{ wish_count }}</span>
         </button>
         
         {% if group.host == request.user %}
@@ -126,7 +134,9 @@
             수정하기
           </button>
         {% elif is_participated %}
-          <button class="detail-join-btn" type="button" onclick="location.href='{% url 'chat:room' group.id %}'" style="background-color: #8e995e;">
+          <button class="detail-join-btn" type="button" {% if room %}
+                  onclick="location.href='{% url 'chat:room' room.id %}'"
+        {% endif %} style="background-color: #8e995e;">
             채팅방 이동
           </button>
         {% else %}
@@ -140,6 +150,6 @@
       <div class="home-indicator"></div>
     </div>
 
-    <script src="{% static 'app/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/nona.js' %}"></script>
   </body>
 </html>

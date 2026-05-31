@@ -6,7 +6,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nona - 나눔 게시글</title>
-    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
   </head>
   <body>
     <div class="mobile-wrap">
@@ -21,25 +21,32 @@
         <header class="page-header detail-header">
           <a href="{% url 'posts:share_list' %}" class="back-btn">‹</a>
           <h1>나눔 게시글</h1>
-          <button class="detail-menu-btn" type="button" aria-label="더보기">
-            ☰
-          </button>
+          {% if request.user == sharing.host %}
+            <button class="detail-menu-btn delete-btn" type="button" aria-label="삭제" 
+                    data-id="{{ sharing.id }}" data-type="shares">🗑️</button>
+          {% endif %}
         </header>
 
         <section class="detail-card detail-summary-card share-summary-card">
-          <div class="detail-thumb egg"></div>
+          {% with sharing.shareImage.all|first as main_image %}
+            {% if main_image %}
+              <div class="detail-thumb" style="background-image: url('{{ main_image.photo.url }}'); background-size: cover;"></div>
+            {% else %}
+              <div class="detail-thumb carrot"></div>
+            {% endif %}
+          {% endwith %}
           <div class="detail-summary">
-            <span class="detail-category">야채</span>
-            <h2>남은 달걀 10개 나눔해요</h2>
-            <p>어제 구매해서 유통기한 넉넉해요</p>
+            <span class="detail-category">{{ sharing.category.name }}</span>
+            <h2>{{ sharing.title }}</h2>
+            <p>{{ sharing.content }}</p>
 
             <div class="seller-row">
               <div class="seller-avatar">○</div>
               <div>
-                <strong>신다연</strong>
-                <span>서울특별시 노원구</span>
+                <strong>{{ sharing.host.username }}</strong>
+                <span>{{ sharing.host.profile.address|default:"주소 미지정" }}</span>
               </div>
-              <em>신뢰도 70%</em>
+              <em>신뢰도 {{ sharing.host.profile.reliability|default:"70" }}%</em>
             </div>
           </div>
         </section>
@@ -47,27 +54,27 @@
         <section class="detail-card progress-card share-quantity-card">
           <div class="detail-section-head">
             <h2>나눔 수량</h2>
-            <strong>2/4개</strong>
+            <strong>{{ participation_count }}/{{ sharing.max_members }}개</strong>
           </div>
           <div class="detail-progress share-quantity-progress">
-            <span style="width: 50%"></span>
+            <span style="width: {% widthratio participation_count sharing.max_members 100 %}%"></span>
             <i></i>
           </div>
-          <p>실시간으로 나눔 수량이 줄어들고 있어요!</p>
+          {% if participation_count >= sharing.max_members %}
+            <p>🎉 모든 나눔 수량이 마감되었습니다!</p>
+          {% else %}
+            <p>실시간으로 나눔 수량이 줄어들고 있어요!</p>
+          {% endif %}
         </section>
 
         <section class="detail-card detail-info-card share-info-card">
           <div class="detail-info-row">
-            <span><i>◷</i> 희망 거래시간</span>
-            <strong>오늘 18 : 30</strong>
-          </div>
-          <div class="detail-info-row">
             <span><i>◷</i> 모집 마감 시간</span>
-            <strong>오늘 18 : 30</strong>
+            <strong>{{ sharing.deadline|date:"Y-m-d H:i" }}</strong>
           </div>
           <div class="detail-info-row">
             <span><i>⌖</i> 희망 거래 장소</span>
-            <strong>태릉입구역 ›</strong>
+            <strong>{{ sharing.location }}</strong>
           </div>
         </section>
 
@@ -76,12 +83,14 @@
           <p>링크를 공유하면 더 많은 분들이 쉽게 참여할 수 있어요!</p>
           <div class="detail-link-box">
             <span>↗</span>
-            <input type="text" value="https" readonly />
+            <input type="text" value="{{ request.build_absolute_uri }}" readonly />
           </div>
           <div class="share-actions">
             <button type="button"><span>●</span>카카오톡</button>
             <button type="button"><span>◎</span>인스타그램</button>
-            <button type="button"><span>↗</span>링크복사</button>
+            <button type="button" onclick="navigator.clipboard.writeText('{{ request.build_absolute_uri }}'); alert('링크가 복사되었습니다!');">
+              <span>⧉</span> 링크 복사
+            </button>
             <button type="button"><span>…</span>더보기</button>
           </div>
         </section>
@@ -93,15 +102,36 @@
       </main>
 
       <footer class="detail-bottom-actions">
-        <button class="detail-like-btn detail-heart-btn" type="button">
-          ♡ <span>12</span>
+        <button class="detail-like-btn heart-btn {% if is_wished %}active{% endif %}"
+                type="button"
+                id="wish-toggle-btn"
+                data-group-id="{{ sharing.id }}" 
+                data-url="{% url 'posts:sharing_wish_toggle' sharing.id %}" 
+                data-login-url="{% url 'accounts:login' %}"
+                {% if request.user.is_authenticated %}data-authenticated="true"{% endif %}>
+          <span class="heart-icon">{% if is_wished %}♥{% else %}♡{% endif %}</span>
+          <span class="heart-count">{{ wish_count }}</span>
         </button>
-        <button class="detail-join-btn" type="button">참여하기</button>
+        
+        {% if sharing.host == request.user %}
+          <button class="detail-join-btn" type="button" onclick="location.href='{% url 'posts:share_update' sharing.id %}'" style="background-color: #afbb78;">
+            수정하기
+          </button>
+        {% elif is_participated %}
+          <button class="detail-join-btn" type="button" {% if room %} onclick="location.href='{% url 'chat:room' room.id %}'" {% endif %} style="background-color: #8e995e;">
+            채팅방 이동
+          </button>
+        {% else %}
+          <form action="{% url 'posts:share_participate' sharing.id %}" method="POST" style="flex: 1; display: flex;">
+            {% csrf_token %}
+            <button class="detail-join-btn" type="submit">참여하기</button>
+          </form>
+        {% endif %}
       </footer>
 
       <div class="home-indicator"></div>
     </div>
 
-    <script src="{% static 'app/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/nona.js' %}"></script>
   </body>
 </html>
