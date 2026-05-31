@@ -1,3 +1,5 @@
+import re
+
 from django import forms
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -13,12 +15,20 @@ class SignupForm(forms.Form):
     password2 = forms.CharField(widget=forms.PasswordInput, label='비밀번호 확인')
 
     def clean_phone_number(self):
-        phone_number = self.cleaned_data['phone_number'].strip()
+        phone_number = re.sub(r'[\s-]', '', self.cleaned_data['phone_number'].strip())
+        if not phone_number.isdigit() or len(phone_number) not in (10, 11):
+            raise forms.ValidationError('전화번호 형식이 올바르지 않습니다.')
         if User.objects.filter(username=phone_number).exists():
             raise forms.ValidationError('이미 가입된 전화번호입니다.')
         if Profile.objects.filter(phone_number=phone_number).exists():
             raise forms.ValidationError('이미 가입된 전화번호입니다.')
         return phone_number
+
+    def clean_nickname(self):
+        nickname = self.cleaned_data['nickname'].strip()
+        if len(nickname) < 2:
+            raise forms.ValidationError('닉네임은 2자 이상 입력해 주세요.')
+        return nickname
 
     def clean(self):
         cleaned_data = super().clean()
@@ -65,6 +75,8 @@ class LoginForm(forms.Form):
         password = cleaned_data.get('password')
 
         if phone_number and password:
+            phone_number = re.sub(r'[\s-]', '', phone_number.strip())
+            cleaned_data['phone_number'] = phone_number
             self.user = authenticate(
                 self.request,
                 username=phone_number,
