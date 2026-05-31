@@ -1,0 +1,67 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 회원가입</title>
+    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>12:00</span>
+        <div class="status-icons">
+          <span>▮</span><span>⌁</span><span>▭</span>
+        </div>
+      </header>
+
+      <main class="create-page">
+        <header class="page-header">
+          <a href="{% url 'posts:group_list' %}" class="back-btn">‹</a>
+          <h1>회원가입</h1>
+        </header>
+
+        <form class="create-form auth-form" method="post">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <section class="form-card auth-error-card">
+              {{ form.non_field_errors }}
+            </section>
+          {% endif %}
+
+          <section class="form-card auth-card">
+            <label class="info-row">
+              <span class="info-label">전화번호</span>
+              <input class="info-input" type="text" name="phone_number" value="{{ form.phone_number.value|default:'' }}" required />
+            </label>
+            {{ form.phone_number.errors }}
+
+            <label class="info-row">
+              <span class="info-label">닉네임</span>
+              <input class="info-input" type="text" name="nickname" value="{{ form.nickname.value|default:'' }}" required />
+            </label>
+            {{ form.nickname.errors }}
+
+            <label class="info-row">
+              <span class="info-label">비밀번호</span>
+              <input class="info-input" type="password" name="password1" required />
+            </label>
+            {{ form.password1.errors }}
+
+            <label class="info-row">
+              <span class="info-label">비밀번호 확인</span>
+              <input class="info-input" type="password" name="password2" required />
+            </label>
+            {{ form.password2.errors }}
+          </section>
+
+          <button class="submit-btn" type="submit">가입하기</button>
+          <a class="delete-btn" href="{% url 'accounts:login' %}">이미 계정이 있어요</a>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>
