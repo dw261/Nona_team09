@@ -6,15 +6,15 @@ from posts.models import *
 from posts.forms import GroupPostForm, SharingPostForm
 from django.db.models import Case, When, IntegerField, Q
 from django.utils.dateparse import parse_datetime
+from chat.models import ChatRoom
 import json
 
 # ================================================
 # 공구
 # ================================================
 def group_list(request):
-    current_sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
+    current_sort = request.GET.get('sort', 'latest')
 
-    # 상태 우선순위 정렬 (모집중 → 마감 → 완료)
     status_order = Case(
         When(status='recruiting', then=0),
         When(status='closed', then=1),
@@ -24,11 +24,11 @@ def group_list(request):
     )
     
     sort_options = {
-        'deadline': 'deadline',  # 마감임박순
-        'latest': '-created_at', # 최신순
-        'oldest': 'created_at',  # 오래된순
-        'price_low': 'price_per',    # 가격 낮은순
-        'price_high': '-price_per',  # 가격 높은순
+        'deadline': 'deadline',
+        'latest': '-created_at',
+        'oldest': 'created_at',
+        'price_low': 'price_per',
+        'price_high': '-price_per',
     }
     
     secondary_sort = sort_options.get(current_sort, '-created_at')
@@ -41,24 +41,18 @@ def group_list(request):
         .order_by('status_order', secondary_sort)
     )
 
-    # 검색
     query = request.GET.get('q', '')
     if query:
         keywords = [kw.strip() for kw in query.split(',') if kw.strip()]
-        
         query_filter = Q()
         for kw in keywords:
-            # 각 키워드가 제목(title)에 포함되어 있는가? (OR 조건 축적)
             query_filter |= Q(title__icontains=kw)
-            
         queryset = queryset.filter(query_filter)
     
-    # 카테고리 필터
     category_id = request.GET.get('category', '')
     if category_id:
         queryset = queryset.filter(category_id=category_id)
  
-    # 찜 목록
     wished_ids = []
     if request.user.is_authenticated:
         wished_ids = list(
@@ -74,7 +68,7 @@ def group_list(request):
     }
     return render(request, 'posts/group_list.html', context)
 
-# 공구 개설 페이지
+
 @login_required
 def group_create(request):
     if request.method == 'POST':
@@ -86,7 +80,6 @@ def group_create(request):
             date_str = request.POST.get('deadline_date')
             time_str = request.POST.get('deadline_time')
             if date_str and time_str:
-                # 'YYYY-MM-DDTHH:MM:SS' 포맷 문자열 생성 후 파싱
                 group.deadline = parse_datetime(f"{date_str}T{time_str}:00")
 
             group.save()
@@ -97,47 +90,48 @@ def group_create(request):
 
             return redirect('posts:group_detail', group_id=group.pk)
         else:
-            print("❌ 나눔 개설 폼 검증 실패:", form.errors)
+            print("❌ 공구 개설 폼 검증 실패:", form.errors)
     else:
         form = GroupPostForm()
 
     return render(request, 'posts/group_create.html', {'form': form, 'categories': Category.objects.all()})
 
-# 공구 상세 페이지
+
 def group_detail(request, group_id):
     group = get_object_or_404(
         groupsPost.objects.select_related('host', 'category').prefetch_related('groupImages', 'groupsParticipants__user'), 
         pk=group_id
     )
     is_participated = False
+    is_wished = False
 
     if request.user.is_authenticated:
         is_participated = groupsParticipant.objects.filter(user=request.user, group=group).exists()
+        is_wished = Wish.objects.filter(user=request.user, group=group).exists()
+
+    room = ChatRoom.objects.filter(group_post=group).first()
 
     context = {
         'group': group,
+        'room': room,
         'is_participated': is_participated,
         'participation_count': group.current_members,
+        'wish_count': group.wishes.count(),  
+        'is_wished': is_wished,              
     }
 
     return render(request, 'posts/group_detail.html', context)
 
-# 공구 수정 페이지
+
 @login_required
 def group_update(request, group_id):
-    group = get_object_or_404( # 본인만 수정 가능
-        groupsPost,
-        pk=group_id,
-        host=request.user,
-    )
+    group = get_object_or_404(groupsPost, pk=group_id, host=request.user)
 
     if request.method == 'POST':
-        # instance=group을 넣어주면 새로 생성되지 않고 기존 글이 '수정'됩니다.
         form = GroupPostForm(request.POST, request.FILES, instance=group)
         if form.is_valid():
             group = form.save(commit=False)
 
-            # 날짜 및 시간 데이터 처리
             date_str = request.POST.get('deadline_date')
             time_str = request.POST.get('deadline_time')
             if date_str and time_str:
@@ -145,7 +139,6 @@ def group_update(request, group_id):
                 
             group.save()
 
-            # 새 이미지 추가 처리
             images = request.FILES.getlist('images')
             current_order = group.groupImages.count()
             for order, image in enumerate(images, start=current_order):
@@ -153,7 +146,6 @@ def group_update(request, group_id):
 
             return redirect('posts:group_detail', group_id=group.pk)
     else:
-        # 기존 글의 데이터가 입력창에 자동으로 채워집니다.
         form = GroupPostForm(instance=group)
     
     context = {
@@ -164,25 +156,25 @@ def group_update(request, group_id):
     }
     return render(request, 'posts/group_create.html', context)
 
-# 공구 삭제 페이지
+
 @login_required
 @require_POST
 def group_delete(request, group_id):
-    group = get_object_or_404( # 본인만 삭제 가능
-        groupsPost,
-        pk=group_id,
-        host=request.user,
-    )
+    group = get_object_or_404(groupsPost, pk=group_id, host=request.user)
     group.delete()
-    return redirect('posts:group_list')
+    return JsonResponse({'message': '공구가 성공적으로 삭제되었습니다.'}, status=200)
 
-# 공구 참여
+
 @login_required
 @require_POST
-def group_participate(request, group_id):
-    group = get_object_or_404(groupsPost, pk=group_id)
+def group_participate(request, room_id):
+    from chat.models import ChatRoom
+
+    room = get_object_or_404(ChatRoom, pk=room_id)
+    group = room.group_post
     if group.host == request.user:
         return JsonResponse({'error': '호스트는 참여할 수 없습니다.'}, status=400)
+
     participation, created = groupsParticipant.objects.get_or_create(
         group=group,
         user=request.user,
@@ -190,13 +182,18 @@ def group_participate(request, group_id):
     if not created:
         return JsonResponse({'error': '이미 참여 신청한 공구입니다.'}, status=400)
     
-    # 참여 인원 업데이트
     group.current_members += 1
     group.save()
 
-    return redirect('chat:room', pk=group_id)  # 채팅방으로 이동
+    # 해당 공구에 연결된 채팅방 가져오거나 없으면 생성
+    room, _ = ChatRoom.objects.get_or_create(
+        group_post=group,
+        defaults={'name': group.title},
+    )
 
-# 공구 찜 토글
+    return redirect('chat:room', room_id=room.id)  # ← room_id로 수정
+
+
 @login_required
 @require_POST
 def group_wish_toggle(request, group_id):
@@ -210,11 +207,12 @@ def group_wish_toggle(request, group_id):
         wished = True
     return JsonResponse({'wished': wished})
 
+
 # ================================================
 # 나눔
 # ================================================
 def shares_list(request):
-    current_sort = request.GET.get('sort', 'latest')  # 기본값은 최신순
+    current_sort = request.GET.get('sort', 'latest')
 
     status_order = Case(
         When(status='recruiting', then=0),
@@ -225,9 +223,9 @@ def shares_list(request):
     )
 
     sort_options = {
-        'deadline': 'deadline',  # 마감임박순
-        'latest': '-created_at', # 최신순
-        'oldest': 'created_at',  # 오래된순
+        'deadline': 'deadline',
+        'latest': '-created_at',
+        'oldest': 'created_at',
     }
     secondary_sort = sort_options.get(current_sort, '-created_at')
 
@@ -239,23 +237,18 @@ def shares_list(request):
         .order_by('status_order', secondary_sort)
     )
 
-    # 검색
     query = request.GET.get('q', '')
     if query:
         keywords = [kw.strip() for kw in query.split(',') if kw.strip()]
-        
         query_filter = Q()
         for kw in keywords:
             query_filter |= Q(title__icontains=kw)
-            
         queryset = queryset.filter(query_filter)
     
-    # 카테고리 필터
     category_id = request.GET.get('category', '')
     if category_id:
         queryset = queryset.filter(category_id=category_id)
  
-    # 찜 목록
     wished_ids = []
     if request.user.is_authenticated:
         wished_ids = list(
@@ -271,7 +264,7 @@ def shares_list(request):
     }
     return render(request, 'posts/share_list.html', context)
 
-# 나눔 개설 페이지
+
 @login_required
 def shares_create(request):
     if request.method == 'POST':
@@ -291,7 +284,7 @@ def shares_create(request):
             for order, image in enumerate(images):
                 SharingImage.objects.create(sharing=share, photo=image, order=order)
 
-            return redirect('posts:shares_detail', share_id=share.pk)
+            return redirect('posts:share_detail', share_id=share.pk)
         else:
             print("❌ 나눔 개설 폼 검증 실패:", form.errors)
     else:
@@ -299,26 +292,30 @@ def shares_create(request):
 
     return render(request, 'posts/share_create.html', {'form': form, 'categories': Category.objects.all()})
 
-# 나눔 상세 페이지
+
 def shares_detail(request, share_id):
     share = get_object_or_404(
         sharingPost.objects.select_related('host', 'category').prefetch_related('shareImage'), 
         pk=share_id
     )
     is_participated = False
+    is_wished = False
 
     if request.user.is_authenticated:
         is_participated = SharingParticipant.objects.filter(user=request.user, sharing=share).exists()
+        is_wished = Wish.objects.filter(user=request.user, sharing=share).exists()
 
     context = {
         'sharing': share,
         'is_participated': is_participated,
         'participation_count': SharingParticipant.objects.filter(sharing=share, status='approved').count(),
+        'wish_count': share.wishes.count(),  
+        'is_wished': is_wished,
     }
 
     return render(request, 'posts/share_detail.html', context)
 
-# 나눔 수정 페이지
+
 @login_required
 def shares_update(request, share_id):
     share = get_object_or_404(sharingPost, pk=share_id, host=request.user)
@@ -328,7 +325,6 @@ def shares_update(request, share_id):
         if form.is_valid():
             share = form.save(commit=False)
 
-            # 날짜 및 시간 처리
             date_str = request.POST.get('deadline_date')
             time_str = request.POST.get('deadline_time')
             if date_str and time_str:
@@ -336,9 +332,8 @@ def shares_update(request, share_id):
 
             share.save()
 
-            # 새 이미지 추가 처리
             images = request.FILES.getlist('images')
-            current_order = share.shareImage.count() # 역참조 이름 매핑 확인 필수
+            current_order = share.shareImage.count()
             for order, image in enumerate(images, start=current_order):
                 SharingImage.objects.create(sharing=share, photo=image, order=order)
 
@@ -354,25 +349,24 @@ def shares_update(request, share_id):
     }
     return render(request, 'posts/share_create.html', context)
 
-# 나눔 삭제 페이지
+
 @login_required
-@require_http_methods(["DELETE"])
+@require_POST
 def shares_delete(request, share_id):
-    share = get_object_or_404( # 본인만 삭제 가능
-        sharingPost,
-        pk=share_id,
-        host=request.user,
-    )
+    share = get_object_or_404(sharingPost, pk=share_id, host=request.user)
     share.delete()
     return JsonResponse({'message': '성공적으로 삭제되었습니다.'}, status=200)
 
-# 나눔 참여
+
 @login_required
 @require_POST
-def shares_participate(request, share_id):
-    share = get_object_or_404(sharingPost, pk=share_id)
+def shares_participate(request, room_id):
+    from chat.models import ChatRoom
+
+    share = get_object_or_404(sharingPost, pk=room_id)
     if share.host == request.user:
         return JsonResponse({'error': '호스트는 참여할 수 없습니다.'}, status=400)
+
     participation, created = SharingParticipant.objects.get_or_create(
         sharing=share,
         user=request.user,
@@ -380,13 +374,13 @@ def shares_participate(request, share_id):
     if not created:
         return JsonResponse({'error': '이미 참여 신청한 나눔입니다.'}, status=400)
 
-    # 참여 인원 업데이트
-    share.current_members += 1
-    share.save()
+    room, _ = ChatRoom.objects.get_or_create(
+        sharing_post=share,
+        defaults={'name': share.title},
+    )
 
-    return redirect('chat:room', pk=share_id)  # 채팅방으로 이동
+    return redirect('chat:room', room_id=room.id)  
 
-# 나눔 찜 토글
 @login_required
 @require_POST
 def sharing_wish_toggle(request, share_id):

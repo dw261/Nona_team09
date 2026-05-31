@@ -110,6 +110,11 @@ document.querySelectorAll(".heart-btn").forEach((button) => {
     event.preventDefault();
     event.stopPropagation();
 
+    if (!button.dataset.authenticated) {
+      window.location.href = button.dataset.loginUrl || '/accounts/login/';
+      return;
+    }
+
     const iconTarget = button.querySelector(".heart-icon") || button;
     const countTarget = button.querySelector(".heart-count");
 
@@ -385,3 +390,64 @@ document.addEventListener("DOMContentLoaded", () => {
     timeInput.value = formattedTime;
   }
 });
+document.addEventListener('DOMContentLoaded', function () {
+    const deleteBtn = document.querySelector('.delete-btn');
+
+    if (deleteBtn) {
+        deleteBtn.addEventListener('click', function () {
+            if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) {
+                return;
+            }
+
+            const postId = this.getAttribute('data-id');
+            const postType = this.getAttribute('data-type'); // 'group' 또는 'shares'
+            const csrftoken = getCookie('csrftoken'); 
+
+            // 규칙적인 URL 생성
+            const url = `/posts/${postType}/${postId}/delete/`;
+
+            // 서버로 삭제 요청 (동일한 폼으로 처리)
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('삭제 권한이 없거나 오류가 발생했습니다.');
+                }
+            })
+            .then(data => {
+                // 서버가 보낸 성공 메시지 알림
+                alert(data.message);
+                
+                // 삭제 완료 후 각 카테고리의 목록 페이지로 이동
+                window.location.href = `/posts/${postType}/`; 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert(error.message || '오류가 발생했습니다. 다시 시도해 주세요.');
+            });
+        });
+    }
+});
+
+// CSRF 토큰 획득 함수 (기존과 동일)
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}

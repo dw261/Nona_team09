@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>nona - 홈</title>
 
-    <link rel="stylesheet" href="{% static 'app/css/nona.css' %}" />
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
   </head>
 
   <body>
@@ -50,7 +50,7 @@
           <a href="{% url 'posts:group_list' %}">
             <img
               class="logo-img"
-              src="{% static 'app/images/logo.svg' %}"
+              src="{% static 'post/images/logo.svg' %}"
               alt="nona"
             />
           </a>
@@ -152,7 +152,7 @@
       </div>
 
       <nav class="bottom-nav">
-        <a href="#">
+        <a href="{% url 'chat:list' %}">
           ♡
           <span>메시지</span>
         </a>
@@ -162,7 +162,7 @@
           <span>홈</span>
         </a>
 
-        <a href="#">
+        <a href="{% url 'accounts:mypage' %}">
           ♙
           <span>마이페이지</span>
         </a>
@@ -227,6 +227,6 @@
       </section>
     </div>
 
-    <script src="{% static 'app/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/nona.js' %}"></script>
   </body>
 </html>
