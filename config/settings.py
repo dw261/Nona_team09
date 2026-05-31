@@ -26,12 +26,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 
-LOGIN_URL = '/admin/login/'  # 일단 admin 로그인 페이지로 임시 연결
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/posts/groups/'
+LOGOUT_REDIRECT_URL = '/posts/groups/'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'accounts',
     'chat',
     'posts',
     'django.contrib.admin',
