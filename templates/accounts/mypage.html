@@ -1,121 +1,93 @@
 {% load static %}
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ko">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>nona - 마이페이지</title>
-    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
-  </head>
-  <body>
-    <div class="mobile-wrap">
-      <header class="status-bar">
-        <span>12:00</span>
-        <div class="status-icons">
-          <span>|</span><span>⌁</span><span>▭</span>
-        </div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>&#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</title>
+  <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+</head>
+<body>
+  <div class="mobile-wrap">
+    <div class="status-bar"><span>9:41</span><span>NONA</span></div>
+    <main class="create-page">
+      <header class="page-header">
+        <a href="{% url 'posts:group_list' %}" class="back-link">‹</a>
+        <h1>&#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</h1>
       </header>
 
-      <main class="detail-page">
-        <header class="page-header detail-header">
-          <a href="{% url 'posts:group_list' %}" class="back-btn">&lt;</a>
-          <h1>마이페이지</h1>
-        </header>
+      <section class="form-card">
+        <h2>&#xB0B4; &#xD504;&#xB85C;&#xD544;</h2>
+        <p>{{ request.user.profile.nickname }}</p>
+        <p>{{ request.user.profile.phone_number }}</p>
+      </section>
 
-        <section class="detail-card detail-summary-card">
-          <div class="seller-avatar">{{ request.user.username|slice:":1" }}</div>
-          <div class="detail-summary">
-            <span class="detail-category">USER</span>
-            <h2>{{ request.user.profile.nickname|default:request.user.username }}</h2>
-            <p>{{ request.user.profile.phone_number|default:"전화번호 미등록" }}</p>
-            <p id="profileAddress">{{ request.user.profile.address|default:"주소 미지정" }}</p>
-          </div>
-        </section>
+      <section class="form-card">
+        <h2>&#xC9C0;&#xC5ED; &#xC778;&#xC99D;</h2>
+        {% if request.user.profile.is_region_verified %}
+          <p class="status-ok">&#xC778;&#xC99D; &#xC644;&#xB8CC;</p>
+          <p>{{ request.user.profile.region }}</p>
+          <p>{{ request.user.profile.address }}</p>
+        {% else %}
+          <p class="status-warn">&#xBBF8;&#xC778;&#xC99D;</p>
+        {% endif %}
+        <button type="button" class="submit-btn" id="verifyRegionBtn">&#xC704;&#xCE58;&#xB85C; &#xC9C0;&#xC5ED; &#xC778;&#xC99D;</button>
+      </section>
 
-        <section class="detail-card progress-card">
-          <div class="detail-section-head">
-            <h2>지역 인증</h2>
-            <strong id="regionStatus">{% if request.user.profile.is_region_verified %}완료{% else %}미완료{% endif %}</strong>
-          </div>
-          <p id="regionMessage">{{ request.user.profile.region|default:"현재 위치로 동네를 인증해 주세요." }}</p>
-        </section>
+      <form method="post" action="{% url 'accounts:logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="submit-btn secondary">&#xB85C;&#xADF8;&#xC544;&#xC6C3;</button>
+      </form>
+    </main>
+  </div>
 
-        <section class="detail-card progress-card">
-          <div class="detail-section-head">
-            <h2>신뢰도</h2>
-            <strong>{{ request.user.profile.reliability|default:"70" }}%</strong>
-          </div>
-          <p>거래 내역과 평가 기능은 추후 연결 예정입니다.</p>
-        </section>
+  <script>
+    const verifyBtn = document.getElementById("verifyRegionBtn");
 
-        <button class="submit-btn" id="regionVerifyBtn" type="button">지역 인증하기</button>
+    function getCookie(name) {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop().split(";").shift();
+      return "";
+    }
 
-        <form method="post" action="{% url 'accounts:logout' %}">
-          {% csrf_token %}
-          <button class="submit-btn" type="submit">로그아웃</button>
-        </form>
-      </main>
-    </div>
-
-    <script>
-      const regionVerifyBtn = document.getElementById("regionVerifyBtn");
-      const regionStatus = document.getElementById("regionStatus");
-      const regionMessage = document.getElementById("regionMessage");
-      const profileAddress = document.getElementById("profileAddress");
-
-      function getCookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
+    verifyBtn.addEventListener("click", () => {
+      if (!navigator.geolocation) {
+        alert("\ud604\uc7ac \uc704\uce58 \uc815\ubcf4\ub97c \uc0ac\uc6a9\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.");
+        return;
       }
 
-      regionVerifyBtn.addEventListener("click", () => {
-        if (!navigator.geolocation) {
-          regionMessage.textContent = "이 브라우저에서는 위치 인증을 사용할 수 없습니다.";
-          return;
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = "\uc778\uc99d \uc911...";
+
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        try {
+          const response = await fetch("{% url 'accounts:verify_region' %}", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify({
+              latitude: position.coords.latitude,
+              longitude: position.coords.longitude,
+            }),
+          });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "\uc9c0\uc5ed \uc778\uc99d\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.");
+          alert("\uc9c0\uc5ed \uc778\uc99d\uc774 \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
+          window.location.reload();
+        } catch (error) {
+          alert(error.message);
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "\uc704\uce58\ub85c \uc9c0\uc5ed \uc778\uc99d";
         }
-
-        regionVerifyBtn.disabled = true;
-        regionVerifyBtn.textContent = "인증 중...";
-
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            try {
-              const response = await fetch("{% url 'accounts:verify_region' %}", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                  "X-CSRFToken": getCookie("csrftoken"),
-                },
-                body: JSON.stringify({
-                  latitude: position.coords.latitude,
-                  longitude: position.coords.longitude,
-                }),
-              });
-              const data = await response.json();
-
-              if (!response.ok) {
-                throw new Error(data.error || "지역 인증에 실패했습니다.");
-              }
-
-              regionStatus.textContent = "완료";
-              regionMessage.textContent = data.region || "지역 인증 완료";
-              profileAddress.textContent = data.address || "주소 확인 완료";
-            } catch (error) {
-              regionMessage.textContent = error.message;
-            } finally {
-              regionVerifyBtn.disabled = false;
-              regionVerifyBtn.textContent = "지역 인증하기";
-            }
-          },
-          () => {
-            regionMessage.textContent = "위치 권한을 허용해야 지역 인증이 가능합니다.";
-            regionVerifyBtn.disabled = false;
-            regionVerifyBtn.textContent = "지역 인증하기";
-          }
-        );
+      }, () => {
+        alert("\uc704\uce58 \uc815\ubcf4\ub97c \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.");
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "\uc704\uce58\ub85c \uc9c0\uc5ed \uc778\uc99d";
       });
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>

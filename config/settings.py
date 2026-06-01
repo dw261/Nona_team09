@@ -31,13 +31,14 @@ ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '*').split(
 KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
 
 # 로그인 및 로그아웃 리다이렉트 설정
-LOGIN_URL = 'accounts:signup'  # 맨 아래 중복되던 것을 위로 통합했습니다.
+LOGIN_URL = 'accounts:login'  # 로그인 필요 시 로그인 페이지로 이동
 LOGIN_REDIRECT_URL = '/posts/groups/'
 LOGOUT_REDIRECT_URL = '/posts/groups/'
 
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'accounts',
     'chat',
     'posts',

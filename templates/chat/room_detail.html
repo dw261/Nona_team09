@@ -1,4 +1,3 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -7,159 +6,215 @@
   <title>{{ room.name }}</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #fdfdfb; font-family: 'Pretendard', -apple-system, sans-serif; display: grid; justify-content: center; }
-
-    :root {
-      --olive: #b3c476; --olive-dark: #5a6141; --olive-soft: #e5edbf;
-      --ink: #515940; --muted: #747b5d; --orange: #ffa42b; --line: #e6e6dd;
-      --my-bubble: #d9e4bf;
-    }
-
-    .frame { position: relative; width: 360px; height: 100vh; display: flex; flex-direction: column; background: #fdfdfb; overflow: hidden; }
-
-    .header { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid var(--line); }
-    .header-title { font-weight: 700; font-size: 15px; }
-    .icon-btn { background: transparent; border: none; padding: 6px; color: var(--ink); display: flex; cursor: pointer; }
-
-    .status-row { margin: 10px 12px 0; padding: 8px 12px; border: 1px solid rgba(179,196,118,0.4); background: var(--olive-soft); border-radius: 8px; display: flex; justify-content: space-between; font-size: 13px; }
-    .status-row .count { color: var(--olive-dark); font-weight: 600; }
-    .status-row .deadline { color: var(--muted); font-size: 12px; }
-
+    body { background: #fdfdfb; color: #515940; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; display: grid; justify-content: center; }
+    .frame { width: 360px; height: 100vh; background: #fdfdfb; display: flex; flex-direction: column; overflow: hidden; }
+    .header { height: 48px; padding: 0 12px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e6e6dd; }
+    .icon { width: 34px; height: 34px; display: grid; place-items: center; color: #515940; text-decoration: none; border: 0; background: transparent; cursor: pointer; font-size: 22px; }
+    .title { max-width: 230px; font-size: 15px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status { margin: 10px 12px 0; padding: 9px 12px; display: flex; justify-content: space-between; gap: 8px; border: 1px solid #d9dfc2; background: #e5edbf; border-radius: 8px; font-size: 12px; color: #5a6141; }
+    .actions { display: flex; gap: 8px; padding: 10px 12px 0; }
+    .action { flex: 1; border: 1px solid #e6e6dd; border-radius: 8px; background: #fff; color: #515940; padding: 9px 6px; font-size: 12px; font-weight: 800; cursor: pointer; }
+    .primary { background: #b3c476; color: #fff; border-color: #b3c476; }
+    .danger { color: #a24b36; }
     .messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
-    .empty-msg { text-align: center; color: var(--muted); font-size: 12px; margin-top: 20px; }
-
-    /* 날짜 구분선 */
-    .date-divider { display: flex; align-items: center; gap: 8px; }
-    .date-divider span { font-size: 11px; color: var(--muted); white-space: nowrap; }
-    .date-divider::before, .date-divider::after { content: ''; flex: 1; height: 1px; background: var(--line); }
-
-    /* 내 메시지 */
-    .bubble-me { display: flex; justify-content: flex-end; align-items: flex-end; gap: 6px; }
-    .bubble-me .time { font-size: 10px; color: var(--muted); }
-    .bubble-me .text { max-width: 70%; background: var(--my-bubble); padding: 8px 12px; border-radius: 16px 16px 4px 16px; font-size: 14px; word-break: break-all; }
-
-    /* 상대 메시지 */
-    .bubble-other { display: flex; align-items: flex-end; gap: 6px; }
-    .bubble-other .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--olive-soft); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; align-self: flex-start; }
-    .bubble-other-inner { display: flex; flex-direction: column; gap: 2px; max-width: 70%; }
-    .bubble-other .username { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
-    .bubble-other .text { background: #f4f7ec; padding: 8px 12px; border-radius: 16px 16px 16px 4px; font-size: 14px; word-break: break-all; }
-    .bubble-other .time { font-size: 10px; color: var(--muted); align-self: flex-end; }
-
-    /* 입력창 */
-    .input-bar { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid var(--line); background: #fff; }
-    .round-btn { width: 32px; height: 32px; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--muted); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-    .send-btn { width: 32px; height: 32px; border-radius: 999px; border: none; background: #fff; color: var(--olive); display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0; }
-    #msg-input { flex: 1; border: 1px solid var(--line); background: #f7f7f1; border-radius: 999px; padding: 8px 14px; font-size: 14px; outline: none; min-width: 0; }
+    .empty { text-align: center; color: #747b5d; font-size: 12px; margin-top: 22px; }
+    .date { display: flex; align-items: center; gap: 8px; color: #747b5d; font-size: 11px; }
+    .date::before, .date::after { content: ""; flex: 1; height: 1px; background: #e6e6dd; }
+    .me, .other { display: flex; gap: 6px; align-items: flex-end; }
+    .me { justify-content: flex-end; }
+    .text { max-width: 235px; padding: 8px 12px; border-radius: 16px; font-size: 14px; line-height: 1.35; word-break: break-word; }
+    .me .text { background: #d9e4bf; border-bottom-right-radius: 4px; }
+    .other .text { background: #f4f7ec; border-bottom-left-radius: 4px; }
+    .time { color: #747b5d; font-size: 10px; flex-shrink: 0; }
+    .avatar { width: 30px; height: 30px; border-radius: 50%; background: #e5edbf; display: grid; place-items: center; font-size: 13px; color: #5a6141; align-self: flex-start; flex-shrink: 0; }
+    .name { display: block; margin-bottom: 3px; color: #747b5d; font-size: 11px; }
+    .system { align-self: center; max-width: 85%; padding: 7px 12px; border-radius: 999px; background: #e5edbf; color: #5a6141; font-size: 12px; font-weight: 800; }
+    .input { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-top: 1px solid #e6e6dd; background: #fff; }
+    .input input { flex: 1; min-width: 0; border: 1px solid #e6e6dd; background: #f7f7f1; border-radius: 999px; padding: 8px 14px; outline: none; font-size: 14px; }
+    .input button { width: 34px; height: 34px; border-radius: 50%; border: 0; background: #b3c476; color: #fff; font-weight: 900; cursor: pointer; }
   </style>
 </head>
 <body>
-<div class="frame">
-  <!-- 헤더 -->
-  <div class="header">
-    <button class="icon-btn" onclick="history.back()">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
-    </button>
-    <div class="header-title">{{ room.name }}</div>
-    <div style="width:32px"></div>
-  </div>
+  <div class="frame">
+    <header class="header">
+      <button class="icon" type="button" onclick="history.back()" aria-label="back">‹</button>
+      {% with post=room.group_post|default:room.sharing_post %}
+        <h1 class="title">{% if post %}{{ post.title }}{% else %}{{ room.name }}{% endif %}</h1>
+      {% endwith %}
+      <a class="icon" href="{% url 'chat:list' %}" aria-label="list">☰</a>
+    </header>
 
-  <!-- 상태 행 (연결된 포스트가 있을 때만) -->
-  {% with post=room.group_post|default:room.sharing_post %}
-  {% if post %}
-  <div class="status-row">
-    <span class="count">{{ post.get_status_display }}{% if room.group_post %} · {{ post.current_members }}/{{ post.min_members }}명{% endif %}</span>
-    <span class="deadline">마감 {{ post.deadline|date:"m/d H:i" }}</span>
-  </div>
-  {% endif %}
-  {% endwith %}
+    {% with post=room.group_post|default:room.sharing_post %}
+      {% if post %}
+        <section class="status">
+          <span>
+            {% if post.status == 'done' %}&#xAC70;&#xB798;&#xC644;&#xB8CC;{% else %}&#xBAA8;&#xC9D1;&#xC911;{% endif %}
+            {% if room.group_post %} · {{ post.current_members }}/{{ post.min_members }}{% endif %}
+          </span>
+          <span>{{ post.deadline|date:"m/d H:i" }}</span>
+        </section>
+        <section class="actions">
+          {% if post.host == request.user %}
+            <button class="action primary" id="confirmBtn" type="button">&#xAC70;&#xB798; &#xD655;&#xC815;</button>
+          {% endif %}
+          <button class="action danger" id="leaveBtn" type="button">&#xCC44;&#xD305;&#xBC29; &#xB098;&#xAC00;&#xAE30;</button>
+        </section>
+      {% endif %}
+    {% endwith %}
 
-  <!-- 메시지 목록 -->
-  <div class="messages" id="messages">
-    {% if not messages %}
-      <p class="empty-msg">첫 메시지를 보내보세요!</p>
-    {% endif %}
-    {% for msg in messages %}
-      {% ifchanged msg.timestamp|date:"Y-m-d" %}
-        <div class="date-divider"><span>{{ msg.timestamp|date:"Y년 m월 d일" }}</span></div>
-      {% endifchanged %}
+    <main class="messages" id="messages">
+      {% if not messages %}
+        <p class="empty">&#xCCAB; &#xBA54;&#xC2DC;&#xC9C0;&#xB97C; &#xBCF4;&#xB0B4;&#xBCF4;&#xC138;&#xC694;.</p>
+      {% endif %}
 
-      {% if msg.user == request.user %}
-        <div class="bubble-me">
-          <span class="time">{{ msg.timestamp|date:"A h:i"|lower }}</span>
-          <div class="text">{{ msg.content }}</div>
-        </div>
-      {% else %}
-        <div class="bubble-other">
-          <div class="avatar">{{ msg.user.username|first|upper }}</div>
-          <div class="bubble-other-inner">
-            <span class="username">{{ msg.user.username }}</span>
-            <div style="display:flex;align-items:flex-end;gap:6px;">
-              <div class="text">{{ msg.content }}</div>
-              <span class="time">{{ msg.timestamp|date:"A h:i"|lower }}</span>
+      {% for msg in messages %}
+        {% ifchanged msg.timestamp|date:"Y-m-d" %}
+          <div class="date"><span>{{ msg.timestamp|date:"Y-m-d" }}</span></div>
+        {% endifchanged %}
+
+        {% if msg.user == request.user %}
+          <div class="me">
+            <span class="time">{{ msg.timestamp|date:"H:i" }}</span>
+            <div class="text">{{ msg.content }}</div>
+          </div>
+        {% else %}
+          <div class="other">
+            <div class="avatar">{{ msg.user.username|first|upper }}</div>
+            <div>
+              <span class="name">{{ msg.user.username }}</span>
+              <div style="display:flex;align-items:flex-end;gap:6px;">
+                <div class="text">{{ msg.content }}</div>
+                <span class="time">{{ msg.timestamp|date:"H:i" }}</span>
+              </div>
             </div>
           </div>
-        </div>
-      {% endif %}
-    {% endfor %}
+        {% endif %}
+      {% endfor %}
+    </main>
+
+    <footer class="input">
+      <input id="msg-input" type="text" placeholder="&#xBA54;&#xC2DC;&#xC9C0;&#xB97C; &#xC785;&#xB825;&#xD558;&#xC138;&#xC694;" autocomplete="off" />
+      <button id="send-btn" type="button" aria-label="send">↑</button>
+    </footer>
   </div>
 
-  <!-- 메시지 입력 -->
-  <div class="input-bar">
-    <button class="round-btn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    </button>
-    <input id="msg-input" type="text" placeholder="메시지를 입력하세요" />
-    <button class="send-btn" id="send-btn">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-    </button>
-  </div>
-</div>
+  <script>
+    const ROOM_NAME = "{{ room.name|escapejs }}";
+    const ME = "{{ request.user.username|escapejs }}";
+    const CONFIRM_URL = "{% url 'chat:confirm' room.id %}";
+    const LEAVE_URL = "{% url 'chat:leave' room.id %}";
+    const CSRF = "{{ csrf_token }}";
+    const msgBox = document.getElementById("messages");
+    const input = document.getElementById("msg-input");
+    const sendBtn = document.getElementById("send-btn");
+    const confirmBtn = document.getElementById("confirmBtn");
+    const leaveBtn = document.getElementById("leaveBtn");
 
-<script>
-  const ROOM_ID = {{ room.id }};
-  const SEND_URL = "{% url 'chat:room' room.id %}";
-  const CSRF = "{{ csrf_token }}";
-  const ME = "{{ request.user.username }}";
-
-  // 스크롤 맨 아래
-  const msgBox = document.getElementById('messages');
-  msgBox.scrollTop = msgBox.scrollHeight;
-
-  function nowStr() {
-    const d = new Date();
-    const h = d.getHours(), m = String(d.getMinutes()).padStart(2,'0');
-    return (h < 12 ? '오전' : '오후') + ' ' + (((h+11)%12)+1) + ':' + m;
-  }
-
-  function appendMyBubble(text) {
-    const empty = document.querySelector('.empty-msg');
-    if (empty) empty.remove();
-    const div = document.createElement('div');
-    div.className = 'bubble-me';
-    div.innerHTML = `<span class="time">${nowStr()}</span><div class="text">${text}</div>`;
-    msgBox.appendChild(div);
     msgBox.scrollTop = msgBox.scrollHeight;
-  }
 
-  async function sendMessage() {
-    const inp = document.getElementById('msg-input');
-    const text = inp.value.trim();
-    if (!text) return;
-    inp.value = '';
-    appendMyBubble(text);
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
 
-    await fetch(SEND_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': CSRF },
-      body: 'content=' + encodeURIComponent(text),
+    function nowStr() {
+      const date = new Date();
+      return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+    }
+
+    function appendBubble(username, message) {
+      const empty = document.querySelector(".empty");
+      if (empty) empty.remove();
+
+      const safeUser = escapeHtml(username);
+      const safeMessage = escapeHtml(message);
+      const wrapper = document.createElement("div");
+
+      if (username === ME) {
+        wrapper.className = "me";
+        wrapper.innerHTML = `<span class="time">${nowStr()}</span><div class="text">${safeMessage}</div>`;
+      } else {
+        wrapper.className = "other";
+        wrapper.innerHTML = `
+          <div class="avatar">${safeUser.charAt(0).toUpperCase()}</div>
+          <div>
+            <span class="name">${safeUser}</span>
+            <div style="display:flex;align-items:flex-end;gap:6px;">
+              <div class="text">${safeMessage}</div>
+              <span class="time">${nowStr()}</span>
+            </div>
+          </div>`;
+      }
+
+      msgBox.appendChild(wrapper);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    function appendSystem(message) {
+      const item = document.createElement("div");
+      item.className = "system";
+      item.textContent = message;
+      msgBox.appendChild(item);
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }
+
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const socket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${ROOM_NAME}/`);
+
+    socket.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      appendBubble(data.username, data.message);
+    };
+
+    socket.onclose = () => appendSystem("\ucc44\ud305 \uc5f0\uacb0\uc774 \uc885\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
+
+    function sendMessage() {
+      const message = input.value.trim();
+      if (!message || socket.readyState !== WebSocket.OPEN) return;
+      socket.send(JSON.stringify({ message }));
+      input.value = "";
+    }
+
+    sendBtn.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") sendMessage();
     });
-  }
 
-  document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('msg-input').addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
-    document.getElementById('send-btn').addEventListener('click', sendMessage);
-  });
-</script>
+    async function postAction(url) {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "X-CSRFToken": CSRF },
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "\uc694\uccad \ucc98\ub9ac\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.");
+      return data;
+    }
+
+    if (confirmBtn) {
+      confirmBtn.addEventListener("click", async () => {
+        try {
+          await postAction(CONFIRM_URL);
+          appendSystem("\uac70\ub798\uac00 \ud655\uc815\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
+          confirmBtn.disabled = true;
+        } catch (error) {
+          alert(error.message);
+        }
+      });
+    }
+
+    leaveBtn.addEventListener("click", async () => {
+      if (!confirm("\ucc44\ud305\ubc29\uc744 \ub098\uac00\uc2dc\uaca0\uc5b4\uc694?")) return;
+      try {
+        await postAction(LEAVE_URL);
+        window.location.href = "{% url 'chat:list' %}";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
 </body>
 </html>

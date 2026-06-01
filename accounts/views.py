@@ -71,13 +71,13 @@ def verify_region(request):
         latitude = float(payload.get('latitude'))
         longitude = float(payload.get('longitude'))
     except (TypeError, ValueError, json.JSONDecodeError):
-        return JsonResponse({'error': '위도와 경도 값이 올바르지 않습니다.'}, status=400)
+        return JsonResponse({'error': '\uc704\ub3c4\uc640 \uacbd\ub3c4 \uac12\uc774 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.'}, status=400)
 
     if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
-        return JsonResponse({'error': '위도 또는 경도 범위가 올바르지 않습니다.'}, status=400)
+        return JsonResponse({'error': '\uc704\ub3c4 \ub610\ub294 \uacbd\ub3c4 \ubc94\uc704\uac00 \uc62c\ubc14\ub974\uc9c0 \uc54a\uc2b5\ub2c8\ub2e4.'}, status=400)
 
     if not settings.KAKAO_REST_API_KEY:
-        return JsonResponse({'error': 'Kakao REST API 키가 설정되지 않았습니다.'}, status=500)
+        return JsonResponse({'error': 'Kakao REST API \ud0a4\uac00 \uc124\uc815\ub418\uc9c0 \uc54a\uc558\uc2b5\ub2c8\ub2e4.'}, status=500)
 
     query = urlencode({'x': longitude, 'y': latitude})
     request_url = f'https://dapi.kakao.com/v2/local/geo/coord2address.json?{query}'
@@ -90,13 +90,13 @@ def verify_region(request):
         with urlopen(kakao_request, timeout=5) as response:
             data = json.loads(response.read().decode('utf-8'))
     except HTTPError as error:
-        return JsonResponse({'error': f'Kakao API 요청 실패: {error.code}'}, status=502)
+        return JsonResponse({'error': f'Kakao API \uc694\uccad \uc2e4\ud328: {error.code}'}, status=502)
     except URLError:
-        return JsonResponse({'error': 'Kakao API에 연결할 수 없습니다.'}, status=502)
+        return JsonResponse({'error': 'Kakao API\uc5d0 \uc5f0\uacb0\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.'}, status=502)
 
     documents = data.get('documents') or []
     if not documents:
-        return JsonResponse({'error': '현재 위치의 주소를 찾을 수 없습니다.'}, status=404)
+        return JsonResponse({'error': '\ud604\uc7ac \uc704\uce58\uc758 \uc8fc\uc18c\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.'}, status=404)
 
     address_info = documents[0].get('address') or {}
     road_address_info = documents[0].get('road_address') or {}
