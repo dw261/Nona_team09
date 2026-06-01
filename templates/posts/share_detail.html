@@ -11,7 +11,7 @@
   <body>
     <div class="mobile-wrap">
       <header class="status-bar">
-        <span>12:00</span>
+        <span>--:--</span>
         <div class="status-icons">
           <span>▮</span><span>⌁</span><span>▭</span>
         </div>
@@ -54,13 +54,13 @@
         <section class="detail-card progress-card share-quantity-card">
           <div class="detail-section-head">
             <h2>나눔 수량</h2>
-            <strong>{{ participation_count }}/{{ sharing.max_members }}개</strong>
+            <strong>{{ participation_count }}/{{ sharing.quantity }}개</strong>
           </div>
           <div class="detail-progress share-quantity-progress">
-            <span style="width: {% widthratio participation_count sharing.max_members 100 %}%"></span>
+            <span style="width: {% widthratio participation_count sharing.quantity 100 %}%"></span>
             <i></i>
           </div>
-          {% if participation_count >= sharing.max_members %}
+          {% if participation_count >= sharing.quantity %}
             <p>🎉 모든 나눔 수량이 마감되었습니다!</p>
           {% else %}
             <p>실시간으로 나눔 수량이 줄어들고 있어요!</p>
@@ -133,5 +133,6 @@
     </div>
 
     <script src="{% static 'post/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
   </body>
 </html>

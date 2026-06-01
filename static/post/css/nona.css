@@ -94,7 +94,14 @@ button {
   height: 28px;
   border: 1.5px solid #a5b36e;
   border-radius: 50%;
+  display: grid;
+  place-items: center;
   font-size: 15px;
+}
+
+.alarm-btn.active {
+  color: #fff;
+  background: #b3c476;
 }
 
 .logo-area {

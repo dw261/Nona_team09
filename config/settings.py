@@ -29,11 +29,16 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 # 환경 변수로부터 ALLOWED_HOSTS를 받아와 공백을 제거하고 리스트로 변환
 ALLOWED_HOSTS = [host.strip() for host in os.getenv('ALLOWED_HOSTS', '*').split(',') if host.strip()]
 KAKAO_REST_API_KEY = os.getenv('KAKAO_REST_API_KEY')
+SMS_API_KEY = os.getenv('SMS_API_KEY')
+SMS_API_SECRET = os.getenv('SMS_API_SECRET')
+SMS_SENDER = os.getenv('SMS_SENDER')
+SMS_VERIFICATION_TTL_SECONDS = int(os.getenv('SMS_VERIFICATION_TTL_SECONDS', '300'))
+SMS_RESEND_COOLDOWN_SECONDS = int(os.getenv('SMS_RESEND_COOLDOWN_SECONDS', '60'))
 
 # 로그인 및 로그아웃 리다이렉트 설정
 LOGIN_URL = 'accounts:login'  # 로그인 필요 시 로그인 페이지로 이동
 LOGIN_REDIRECT_URL = '/posts/groups/'
-LOGOUT_REDIRECT_URL = '/posts/groups/'
+LOGOUT_REDIRECT_URL = '/accounts/login/'
 
 # Application definition
 

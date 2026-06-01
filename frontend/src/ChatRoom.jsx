@@ -14,6 +14,11 @@ const now = () => {
   return `${ampm} ${((h + 11) % 12) + 1}:${m}`;
 };
 
+const statusTime = () => {
+  const d = new Date();
+  return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+};
+
 const C = {
   olive: '#b3c476',
   oliveDark: '#5a6141',
@@ -28,6 +33,7 @@ const C = {
 };
 
 export default function ChatRoom({ onBack }) {
+  const [time, setTime] = useState(statusTime);
   const [participants, setParticipants] = useState(['나']);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -36,6 +42,11 @@ export default function ChatRoom({ onBack }) {
   const [proposalPrice, setProposalPrice] = useState(8000);
   const [confirmed, setConfirmed] = useState(false);
   const scrollRef = useRef(null);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setTime(statusTime()), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -103,7 +114,7 @@ export default function ChatRoom({ onBack }) {
     <div style={S.stage}>
       <div style={S.frame}>
         {/* status bar */}
-        <div style={S.statusBar}><span>12:00</span><span /></div>
+        <div style={S.statusBar}><span>{time}</span><span /></div>
 
         {/* header */}
         <div style={S.header}>

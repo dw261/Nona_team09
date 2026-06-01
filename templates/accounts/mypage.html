@@ -1,93 +1,125 @@
 {% load static %}
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</title>
-  <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
-</head>
-<body>
-  <div class="mobile-wrap">
-    <div class="status-bar"><span>9:41</span><span>NONA</span></div>
-    <main class="create-page">
-      <header class="page-header">
-        <a href="{% url 'posts:group_list' %}" class="back-link">‹</a>
-        <h1>&#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - &#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>--:--</span>
+        <div class="status-icons">
+          <span>|</span><span>&#x2301;</span><span>&#x25AD;</span>
+        </div>
       </header>
 
-      <section class="form-card">
-        <h2>&#xB0B4; &#xD504;&#xB85C;&#xD544;</h2>
-        <p>{{ request.user.profile.nickname }}</p>
-        <p>{{ request.user.profile.phone_number }}</p>
-      </section>
+      <main class="detail-page">
+        <header class="page-header detail-header">
+          <a href="{% url 'posts:group_list' %}" class="back-btn">&lt;</a>
+          <h1>&#xB9C8;&#xC774;&#xD398;&#xC774;&#xC9C0;</h1>
+        </header>
 
-      <section class="form-card">
-        <h2>&#xC9C0;&#xC5ED; &#xC778;&#xC99D;</h2>
-        {% if request.user.profile.is_region_verified %}
-          <p class="status-ok">&#xC778;&#xC99D; &#xC644;&#xB8CC;</p>
-          <p>{{ request.user.profile.region }}</p>
-          <p>{{ request.user.profile.address }}</p>
-        {% else %}
-          <p class="status-warn">&#xBBF8;&#xC778;&#xC99D;</p>
-        {% endif %}
-        <button type="button" class="submit-btn" id="verifyRegionBtn">&#xC704;&#xCE58;&#xB85C; &#xC9C0;&#xC5ED; &#xC778;&#xC99D;</button>
-      </section>
+        <section class="detail-card detail-summary-card">
+          <div class="seller-avatar">{{ request.user.username|slice:":1" }}</div>
+          <div class="detail-summary">
+            <span class="detail-category">USER</span>
+            <h2>{{ request.user.profile.nickname|default:request.user.username }}</h2>
+            <p>{{ request.user.profile.phone_number|default:"전화번호 미등록" }}</p>
+            <p id="profileAddress">{{ request.user.profile.address|default:"주소 미지정" }}</p>
+          </div>
+        </section>
 
-      <form method="post" action="{% url 'accounts:logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="submit-btn secondary">&#xB85C;&#xADF8;&#xC544;&#xC6C3;</button>
-      </form>
-    </main>
-  </div>
+        <section class="detail-card progress-card">
+          <div class="detail-section-head">
+            <h2>&#xC9C0;&#xC5ED; &#xC778;&#xC99D;</h2>
+            <strong id="regionStatus">
+              {% if request.user.profile.is_region_verified %}&#xC644;&#xB8CC;{% else %}&#xBBF8;&#xC644;&#xB8CC;{% endif %}
+            </strong>
+          </div>
+          <p id="regionMessage">{{ request.user.profile.region|default:"현재 위치로 동네를 인증해 주세요." }}</p>
+        </section>
 
-  <script>
-    const verifyBtn = document.getElementById("verifyRegionBtn");
+        <section class="detail-card progress-card">
+          <div class="detail-section-head">
+            <h2>&#xC2E0;&#xB8B0;&#xB3C4;</h2>
+            <strong>{{ request.user.profile.reliability|default:"70" }}%</strong>
+          </div>
+          <p>&#xAC70;&#xB798; &#xB0B4;&#xC5ED;&#xACFC; &#xD3C9;&#xAC00; &#xAE30;&#xB2A5;&#xC740; &#xCD94;&#xD6C4; &#xC5F0;&#xACB0; &#xC608;&#xC815;&#xC785;&#xB2C8;&#xB2E4;.</p>
+        </section>
 
-    function getCookie(name) {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop().split(";").shift();
-      return "";
-    }
+        <button class="submit-btn" id="regionVerifyBtn" type="button">&#xC9C0;&#xC5ED; &#xC778;&#xC99D;&#xD558;&#xAE30;</button>
 
-    verifyBtn.addEventListener("click", () => {
-      if (!navigator.geolocation) {
-        alert("\ud604\uc7ac \uc704\uce58 \uc815\ubcf4\ub97c \uc0ac\uc6a9\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.");
-        return;
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button class="submit-btn" type="submit">&#xB85C;&#xADF8;&#xC544;&#xC6C3;</button>
+        </form>
+      </main>
+    </div>
+
+    <script>
+      const regionVerifyBtn = document.getElementById("regionVerifyBtn");
+      const regionStatus = document.getElementById("regionStatus");
+      const regionMessage = document.getElementById("regionMessage");
+      const profileAddress = document.getElementById("profileAddress");
+
+      function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+        return "";
       }
 
-      verifyBtn.disabled = true;
-      verifyBtn.textContent = "\uc778\uc99d \uc911...";
-
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        try {
-          const response = await fetch("{% url 'accounts:verify_region' %}", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify({
-              latitude: position.coords.latitude,
-              longitude: position.coords.longitude,
-            }),
-          });
-          const data = await response.json();
-          if (!response.ok) throw new Error(data.error || "\uc9c0\uc5ed \uc778\uc99d\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.");
-          alert("\uc9c0\uc5ed \uc778\uc99d\uc774 \uc644\ub8cc\ub418\uc5c8\uc2b5\ub2c8\ub2e4.");
-          window.location.reload();
-        } catch (error) {
-          alert(error.message);
-          verifyBtn.disabled = false;
-          verifyBtn.textContent = "\uc704\uce58\ub85c \uc9c0\uc5ed \uc778\uc99d";
+      regionVerifyBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          regionMessage.textContent = "\uc774 \ube0c\ub77c\uc6b0\uc800\uc5d0\uc11c\ub294 \uc704\uce58 \uc778\uc99d\uc744 \uc0ac\uc6a9\ud560 \uc218 \uc5c6\uc2b5\ub2c8\ub2e4.";
+          return;
         }
-      }, () => {
-        alert("\uc704\uce58 \uc815\ubcf4\ub97c \uac00\uc838\uc624\uc9c0 \ubabb\ud588\uc2b5\ub2c8\ub2e4.");
-        verifyBtn.disabled = false;
-        verifyBtn.textContent = "\uc704\uce58\ub85c \uc9c0\uc5ed \uc778\uc99d";
+
+        regionVerifyBtn.disabled = true;
+        regionVerifyBtn.textContent = "\uc778\uc99d \uc911...";
+
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            try {
+              const response = await fetch("{% url 'accounts:verify_region' %}", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "X-CSRFToken": getCookie("csrftoken"),
+                },
+                body: JSON.stringify({
+                  latitude: position.coords.latitude,
+                  longitude: position.coords.longitude,
+                }),
+              });
+              const data = await response.json();
+
+              if (!response.ok) {
+                throw new Error(data.error || "\uc9c0\uc5ed \uc778\uc99d\uc5d0 \uc2e4\ud328\ud588\uc2b5\ub2c8\ub2e4.");
+              }
+
+              regionStatus.textContent = "\uc644\ub8cc";
+              regionMessage.textContent = data.region || "\uc9c0\uc5ed \uc778\uc99d \uc644\ub8cc";
+              profileAddress.textContent = data.address || "\uc8fc\uc18c \ud655\uc778 \uc644\ub8cc";
+            } catch (error) {
+              regionMessage.textContent = error.message;
+            } finally {
+              regionVerifyBtn.disabled = false;
+              regionVerifyBtn.textContent = "\uc9c0\uc5ed \uc778\uc99d\ud558\uae30";
+            }
+          },
+          () => {
+            regionMessage.textContent = "\uc704\uce58 \uad8c\ud55c\uc744 \ud5c8\uc6a9\ud574\uc57c \uc9c0\uc5ed \uc778\uc99d\uc774 \uac00\ub2a5\ud569\ub2c8\ub2e4.";
+            regionVerifyBtn.disabled = false;
+            regionVerifyBtn.textContent = "\uc9c0\uc5ed \uc778\uc99d\ud558\uae30";
+          }
+        );
       });
-    });
-  </script>
-</body>
+    </script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
 </html>

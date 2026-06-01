@@ -1,0 +1,34 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 가입 완료</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+    <style>
+      .complete-panel { min-height: calc(100vh - 59px); padding: 86px 18px 34px; text-align: center; }
+      .complete-panel h1 { color: #515940; font-size: 18px; font-weight: 850; line-height: 1.43; }
+      .complete-panel p { margin: 24px 0 0; color: #747b5d; font-size: 11px; line-height: 1.55; }
+      .complete-art-box { width: 250px; height: 220px; margin: 22px auto 26px; display: grid; place-items: center; border-radius: 14px; background: #f4f7ec; color: #5a6141; font-size: 58px; }
+      .main-button { display: flex; align-items: center; justify-content: center; width: 250px; height: 42px; margin: 18px auto 0; border: 0; border-radius: 999px; color: #515940; background: #b3c476; font-size: 12px; font-weight: 750; text-decoration: none; }
+    </style>
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>--:--</span>
+        <div class="status-icons"><span>|</span><span>⌁</span><span>▭</span></div>
+      </header>
+
+      <main class="complete-panel">
+        <h1>첫 공동구매 준비 완료!<br />가입이 완료되었어요!</h1>
+        <p>이제 가까운 사람들과<br />함께 필요한 물건을 나눠보세요.</p>
+        <div class="complete-art-box" aria-hidden="true">✓</div>
+        <a class="main-button" href="{% url 'posts:group_list' %}">시작하기</a>
+      </main>
+    </div>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
+</html>

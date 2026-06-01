@@ -12,7 +12,7 @@
   <body>
     <div class="mobile-wrap">
       <header class="status-bar">
-        <span>12:00</span>
+        <span>--:--</span>
         <div class="status-icons">
           <span>▮</span><span>⌁</span><span>▭</span>
         </div>
@@ -184,7 +184,7 @@
 
             <div class="link-input-box">
               <span class="link-icon">↗</span>
-              <input type="url" name="product_url" placeholder="https" value="{{ group.link|default:'' }}" />
+              <input type="url" name="link" placeholder="https" value="{{ group.link|default:'' }}" />
               <button type="button">링크 붙여넣기</button>
             </div>
           </section>
@@ -256,5 +256,6 @@
     </div>
 
     <script src="{% static 'post/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
   </body>
 </html>

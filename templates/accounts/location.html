@@ -1,0 +1,114 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - 지역 인증</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+    <style>
+      .onboarding-panel { min-height: calc(100vh - 59px); padding: 28px 18px 34px; text-align: center; }
+      .step-dots { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 8px 0 32px; }
+      .step-dots span { width: 17px; height: 17px; border-radius: 999px; background: #e5edbf; }
+      .step-dots span.active { background: #b3c476; }
+      .step-dots i { width: 31px; height: 1px; background: #dfe8ba; }
+      .onboarding-panel h1 { color: #515940; font-size: 18px; font-weight: 850; line-height: 1.43; }
+      .onboarding-panel p { margin: 12px 0 0; color: #747b5d; font-size: 11px; line-height: 1.55; }
+      .location-art-box { width: 260px; height: 205px; margin: 24px auto 22px; display: grid; place-items: center; border-radius: 14px; background: #f4f7ec; color: #5a6141; font-size: 54px; }
+      .area-box { display: flex; align-items: center; gap: 7px; width: 250px; height: 38px; margin: 0 auto 14px; padding: 0 11px; border: 1px solid #c8d78e; border-radius: 8px; color: #747b5d; background: #fff; }
+      .area-box input { flex: 1; min-width: 0; border: 0; outline: 0; color: #515940; background: transparent; font-size: 11px; }
+      .main-button { display: flex; align-items: center; justify-content: center; width: 250px; height: 42px; margin: 14px auto 0; border: 0; border-radius: 999px; color: #515940; background: #b3c476; font-size: 12px; font-weight: 750; text-decoration: none; }
+      .link-button { display: block; margin: 18px auto 0; border: 0; background: transparent; color: #5f6650; font-size: 11px; text-decoration: underline; text-underline-offset: 3px; }
+      .message { min-height: 18px; margin-top: 12px; color: #747b5d; font-size: 11px; }
+      .message.error { color: #a24b36; }
+    </style>
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>--:--</span>
+        <div class="status-icons"><span>|</span><span>⌁</span><span>▭</span></div>
+      </header>
+
+      <main class="onboarding-panel">
+        <a href="{% url 'accounts:signup' %}" class="back-btn" aria-label="뒤로">&lt;</a>
+        <div class="step-dots"><span></span><i></i><span></span><i></i><span class="active"></span></div>
+        <h1>가까운 곳에서의 거래를 위해<br />동네 인증이 필요해요</h1>
+        <p>현재 위치를 기반으로<br />가까운 공구와 나눔을 보여드릴게요</p>
+
+        <div class="location-art-box" aria-hidden="true">⌖</div>
+
+        <label class="area-box">
+          <span>⌖</span>
+          <input id="areaInput" value="{{ request.user.profile.region|default:'' }}" placeholder="동네 인증 전" readonly />
+        </label>
+
+        <button class="main-button" id="verifyLocationBtn" type="button">현재 위치로 인증하기</button>
+        <a class="link-button" href="{% url 'accounts:complete' %}">나중에 할게요</a>
+        <p class="message" id="locationMessage">위치 정보는 동네 인증 용도로만 사용돼요.</p>
+      </main>
+    </div>
+
+    <script>
+      const verifyBtn = document.getElementById("verifyLocationBtn");
+      const message = document.getElementById("locationMessage");
+      const areaInput = document.getElementById("areaInput");
+
+      function getCookie(name) {
+        const cookies = document.cookie ? document.cookie.split(";") : [];
+        for (const cookie of cookies) {
+          const trimmed = cookie.trim();
+          if (trimmed.startsWith(`${name}=`)) {
+            return decodeURIComponent(trimmed.slice(name.length + 1));
+          }
+        }
+        return "";
+      }
+
+      verifyBtn.addEventListener("click", () => {
+        if (!navigator.geolocation) {
+          message.textContent = "이 브라우저에서는 위치 인증을 사용할 수 없습니다.";
+          message.classList.add("error");
+          return;
+        }
+
+        verifyBtn.disabled = true;
+        verifyBtn.textContent = "인증 중...";
+        message.classList.remove("error");
+        message.textContent = "현재 위치를 확인하고 있어요.";
+
+        navigator.geolocation.getCurrentPosition(async (position) => {
+          try {
+            const response = await fetch("{% url 'accounts:verify_region' %}", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+              body: JSON.stringify({
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+              }),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "지역 인증에 실패했습니다.");
+            areaInput.value = data.region || data.address || "지역 인증 완료";
+            window.location.href = "{% url 'accounts:complete' %}";
+          } catch (error) {
+            message.textContent = error.message;
+            message.classList.add("error");
+            verifyBtn.disabled = false;
+            verifyBtn.textContent = "현재 위치로 인증하기";
+          }
+        }, () => {
+          message.textContent = "위치 권한을 허용해 주세요.";
+          message.classList.add("error");
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "현재 위치로 인증하기";
+        });
+      });
+    </script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
+</html>

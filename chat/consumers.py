@@ -75,13 +75,19 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if room.group_post_id:
             if room.group_post.host_id == user.id:
                 return room
-            if room.group_post.groupsParticipants.filter(user=user).exclude(status='cancelled').exists():
+            if room.group_post.groupsParticipants.filter(
+                user=user,
+                status__in=['pending', 'approved'],
+            ).exists():
                 return room
 
         if room.sharing_post_id:
             if room.sharing_post.host_id == user.id:
                 return room
-            if room.sharing_post.participants.filter(user=user).exclude(status='rejected').exists():
+            if room.sharing_post.participants.filter(
+                user=user,
+                status__in=['pending', 'approved'],
+            ).exists():
                 return room
 
         return None

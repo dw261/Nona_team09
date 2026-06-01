@@ -93,6 +93,7 @@ poetry.toml
 pyrightconfig.json
 
 # Editors
+.idea/
 .vscode/
 .history/
 *.vsix
