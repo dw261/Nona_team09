@@ -23,7 +23,7 @@
           <h1>공구 게시물</h1>
           {% if request.user == group.host %}
             <button class="detail-menu-btn delete-btn" type="button" aria-label="삭제" 
-                    data-id="{{ group.id }}" data-type="group"></button>
+                    data-id="{{ group.id }}" data-type="group">🗑️</button>
           {% endif %}
         </header>
 
