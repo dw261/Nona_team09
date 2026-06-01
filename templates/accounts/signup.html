@@ -1,49 +1,80 @@
 {% load static %}
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>&#xD68C;&#xC6D0;&#xAC00;&#xC785;</title>
-  <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
-</head>
-<body>
-  <div class="mobile-wrap">
-    <div class="status-bar"><span>9:41</span><span>NONA</span></div>
-    <main class="create-page">
-      <header class="page-header">
-        <a href="{% url 'accounts:login' %}" class="back-link">‹</a>
-        <h1>&#xD68C;&#xC6D0;&#xAC00;&#xC785;</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - &#xD68C;&#xC6D0;&#xAC00;&#xC785;</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+  </head>
+  <body>
+    <div class="mobile-wrap">
+      <header class="status-bar">
+        <span>--:--</span>
+        <div class="status-icons">
+          <span>|</span><span>&#x2301;</span><span>&#x25AD;</span>
+        </div>
       </header>
 
-      <form method="post" class="form-card">
-        {% csrf_token %}
-        {{ form.non_field_errors }}
+      <main class="create-page">
+        <header class="page-header">
+          <a href="{% url 'accounts:login' %}" class="back-btn">&lt;</a>
+          <h1>&#xD68C;&#xC6D0;&#xAC00;&#xC785;</h1>
+        </header>
 
-        <label for="{{ form.phone_number.id_for_label }}">&#xC804;&#xD654;&#xBC88;&#xD638;</label>
-        {{ form.phone_number }}
-        {{ form.phone_number.errors }}
+        <form class="create-form auth-form" method="post">
+          {% csrf_token %}
 
-        <label for="{{ form.nickname.id_for_label }}">&#xB2C9;&#xB124;&#xC784;</label>
-        {{ form.nickname }}
-        {{ form.nickname.errors }}
+          {% if form.non_field_errors %}
+            <section class="form-card auth-error-card">
+              {{ form.non_field_errors }}
+            </section>
+          {% endif %}
 
-        <label for="{{ form.password1.id_for_label }}">&#xBE44;&#xBC00;&#xBC88;&#xD638;</label>
-        {{ form.password1 }}
-        {{ form.password1.errors }}
+          <section class="form-card auth-card">
+            <label class="info-row">
+              <span class="info-label">&#xC804;&#xD654;&#xBC88;&#xD638;</span>
+              <input
+                class="info-input"
+                type="text"
+                name="phone_number"
+                value="{{ form.phone_number.value|default:'' }}"
+                required
+              />
+            </label>
+            {{ form.phone_number.errors }}
 
-        <label for="{{ form.password2.id_for_label }}">&#xBE44;&#xBC00;&#xBC88;&#xD638; &#xD655;&#xC778;</label>
-        {{ form.password2 }}
-        {{ form.password2.errors }}
+            <label class="info-row">
+              <span class="info-label">&#xB2C9;&#xB124;&#xC784;</span>
+              <input
+                class="info-input"
+                type="text"
+                name="nickname"
+                value="{{ form.nickname.value|default:'' }}"
+                required
+              />
+            </label>
+            {{ form.nickname.errors }}
 
-        <button type="submit" class="submit-btn">&#xAC00;&#xC785;&#xD558;&#xAE30;</button>
-      </form>
+            <label class="info-row">
+              <span class="info-label">&#xBE44;&#xBC00;&#xBC88;&#xD638;</span>
+              <input class="info-input" type="password" name="password1" required />
+            </label>
+            {{ form.password1.errors }}
 
-      <p class="auth-link">
-        &#xC774;&#xBBF8; &#xACC4;&#xC815;&#xC774; &#xC788;&#xB098;&#xC694;?
-        <a href="{% url 'accounts:login' %}">&#xB85C;&#xADF8;&#xC778;</a>
-      </p>
-    </main>
-  </div>
-</body>
+            <label class="info-row">
+              <span class="info-label">&#xBE44;&#xBC00;&#xBC88;&#xD638; &#xD655;&#xC778;</span>
+              <input class="info-input" type="password" name="password2" required />
+            </label>
+            {{ form.password2.errors }}
+          </section>
+
+          <button class="submit-btn" type="submit">&#xAC00;&#xC785;&#xD558;&#xAE30;</button>
+          <a class="delete-btn" href="{% url 'accounts:login' %}">&#xC774;&#xBBF8; &#xACC4;&#xC815;&#xC774; &#xC788;&#xC5B4;&#xC694;</a>
+        </form>
+      </main>
+    </div>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
 </html>

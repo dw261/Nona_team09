@@ -1,0 +1,223 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NONA - 인증번호 입력</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        min-height: 100vh;
+        margin: 0;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: #e5e5e5;
+        color: #515940;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+      .device-shell {
+        position: relative;
+        width: 393px;
+        height: 852px;
+        max-width: 100%;
+        max-height: calc(100vh - 32px);
+        padding: 12px;
+        overflow: hidden;
+        border-radius: 55px;
+        background: #050505;
+        box-shadow: 0 24px 60px rgba(30, 37, 40, 0.28);
+      }
+      .screen {
+        position: relative;
+        height: 100%;
+        overflow: hidden;
+        border-radius: 44px;
+        background: #fdfdfb;
+      }
+      .status-bar {
+        height: 58px;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        padding: 0 28px 13px;
+        color: #1e2528;
+        font-size: 15px;
+        font-weight: 800;
+      }
+      .status-icons {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        color: #515940;
+        font-size: 11px;
+      }
+      .content {
+        position: relative;
+        min-height: calc(100% - 58px);
+        padding: 42px 28px 36px;
+      }
+      .back-button {
+        position: absolute;
+        top: 35px;
+        left: 26px;
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border: 0;
+        color: #515940;
+        background: transparent;
+        text-decoration: none;
+        font-size: 34px;
+        line-height: 1;
+      }
+      .steps {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .steps span {
+        width: 17px;
+        height: 17px;
+        border-radius: 50%;
+        background: #e5edbf;
+      }
+      .steps span.active { background: #b3c476; }
+      .steps i {
+        width: 34px;
+        height: 1px;
+        background: #dfe8ba;
+      }
+      .copy {
+        margin-top: 66px;
+        text-align: center;
+      }
+      .copy h1 {
+        margin: 0;
+        color: #515940;
+        font-size: 23px;
+        line-height: 1.35;
+        letter-spacing: 0;
+      }
+      .copy p {
+        margin: 16px auto 0;
+        max-width: 280px;
+        color: #747b5d;
+        font-size: 13px;
+        line-height: 1.65;
+      }
+      .code-input {
+        width: 100%;
+        height: 54px;
+        margin-top: 32px;
+        border: 1px solid #c8d78e;
+        border-radius: 8px;
+        color: #515940;
+        background: #fff;
+        font-size: 23px;
+        font-weight: 800;
+        letter-spacing: 10px;
+        text-align: center;
+        outline: 0;
+      }
+      .code-input:focus {
+        border-color: #a7ba64;
+        box-shadow: 0 0 0 3px rgba(179, 196, 118, 0.22);
+      }
+      .error-message {
+        margin: 16px 0 -12px;
+        color: #c45a45;
+        font-size: 13px;
+        line-height: 1.5;
+        text-align: center;
+      }
+      .submit-button {
+        width: 100%;
+        height: 50px;
+        margin-top: 18px;
+        border: 0;
+        border-radius: 8px;
+        color: #515940;
+        background: #b3c476;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      .link-button {
+        display: block;
+        margin-top: 22px;
+        color: #515940;
+        text-align: center;
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        font-size: 13px;
+      }
+      @media (max-width: 430px) {
+        body { padding: 0; background: #fdfdfb; }
+        .device-shell {
+          width: 100vw;
+          height: 100vh;
+          max-height: none;
+          padding: 0;
+          border-radius: 0;
+          background: #fdfdfb;
+          box-shadow: none;
+        }
+        .screen { border-radius: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="device-shell" aria-label="인증번호 입력">
+      <div class="screen">
+        <div class="status-bar">
+          <strong>--:--</strong>
+          <div class="status-icons" aria-hidden="true">
+            <span>LTE</span><span>●●●</span><span>▰</span>
+          </div>
+        </div>
+
+        <form class="content" method="post">
+          {% csrf_token %}
+          <a class="back-button" href="{% url 'accounts:phone' %}" aria-label="이전">‹</a>
+          <div class="steps" aria-hidden="true"><span></span><i></i><span class="active"></span><i></i><span></span></div>
+
+          <section class="copy">
+            <h1>인증번호를<br />입력해주세요</h1>
+            <p>{{ phone_number }}으로 인증번호를 보냈어요.</p>
+          </section>
+
+          {% if error %}<p class="error-message">{{ error }}</p>{% endif %}
+          <input
+            class="code-input"
+            type="text"
+            name="code"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            maxlength="6"
+            autocomplete="one-time-code"
+            aria-label="인증번호 6자리"
+            required
+          />
+          <button class="submit-button" type="submit">확인</button>
+          <a class="link-button" href="{% url 'accounts:phone' %}">전화번호 다시 입력</a>
+        </form>
+      </div>
+    </main>
+
+    <script>
+      const codeInput = document.querySelector('.code-input');
+      if (codeInput) {
+        codeInput.addEventListener('input', () => {
+          codeInput.value = codeInput.value.replace(/\D/g, '').slice(0, 6);
+        });
+      }
+    </script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
+</html>

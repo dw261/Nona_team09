@@ -1,0 +1,66 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - phone</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+    <style>
+      .onboarding-stage { min-height: 100vh; display: grid; justify-content: center; align-content: start; background: #fff; }
+      .onboarding-frame { position: relative; width: 310px; min-height: 665px; overflow: hidden; background: #fdfdfb; }
+      .onboarding-status { display: flex; align-items: center; justify-content: space-between; height: 59px; padding: 20px 23px 0 38px; color: #1e2528; font-size: 14px; font-weight: 800; }
+      .onboarding-icons { display: flex; gap: 9px; }
+      .form-screen { position: relative; min-height: 606px; padding: 0 18px 34px; }
+      .back-button { position: absolute; left: 26px; top: 49px; display: grid; width: 22px; height: 22px; place-items: center; padding: 0; border: 0; color: #515940; background: transparent; text-decoration: none; font-size: 24px; }
+      .steps { display: flex; align-items: center; justify-content: center; gap: 10px; padding-top: 46px; }
+      .steps span { width: 17px; height: 17px; border-radius: 50%; background: #e5edbf; }
+      .steps span.active { background: #b3c476; }
+      .steps i { width: 31px; height: 1px; background: #dfe8ba; }
+      .copy-block { margin-top: 36px; text-align: center; }
+      .copy-block h1 { margin: 0; color: #515940; font-size: 17px; font-weight: 850; line-height: 1.43; }
+      .subcopy { margin: 14px 0 0; color: #747b5d; font-size: 11px; font-weight: 500; line-height: 1.55; text-align: center; }
+      .line-input { display: flex; align-items: center; gap: 11px; width: 278px; height: 41px; margin: 22px auto 0; padding: 0 13px; border: 1px solid #c8d78e; border-radius: 7px; color: #747b5d; background: #fff; }
+      .line-input input { width: 100%; min-width: 0; border: 0; outline: 0; color: #515940; background: transparent; font-size: 12px; }
+      .main-button { display: flex; align-items: center; justify-content: center; width: 278px; height: 39px; margin: 17px auto 0; border: 0; border-radius: 6px; color: #515940; background: #b3c476; font-size: 12px; font-weight: 750; }
+      .notice { width: 278px; margin: 24px auto 0; padding: 28px 22px 18px; border-radius: 8px; color: #747b5d; background: #fff; box-shadow: 0 2px 12px rgba(47, 57, 42, 0.09); text-align: left; }
+      .notice strong { display: block; margin-bottom: 5px; font-size: 10px; }
+      .notice p { margin: 0; padding-left: 14px; font-size: 9.5px; line-height: 1.55; }
+      .existing-account { display: block; margin: 19px auto 0; color: #515940; text-align: center; text-decoration: underline; text-underline-offset: 3px; font-size: 13px; font-weight: 300; }
+      @media (max-width: 420px) { .onboarding-frame { width: 100vw; min-height: 100vh; } }
+    </style>
+  </head>
+  <body>
+    <div class="onboarding-stage">
+      <main class="onboarding-frame">
+        <div class="onboarding-status">
+          <strong>--:--</strong>
+          <div class="onboarding-icons"><span>|</span><span>&#x2301;</span><span>&#x25AD;</span></div>
+        </div>
+
+        <form class="form-screen" method="post">
+          {% csrf_token %}
+          <a class="back-button" href="{% url 'accounts:welcome' %}" aria-label="back">&#x2039;</a>
+          <div class="steps"><span class="active"></span><i></i><span></span><i></i><span></span></div>
+          <section class="copy-block">
+            <h1>&#xC804;&#xD654;&#xBC88;&#xD638;&#xB97C;<br />&#xC785;&#xB825;&#xD574;&#xC8FC;&#xC138;&#xC694;</h1>
+          </section>
+          <p class="subcopy">&#xC778;&#xC99D;&#xBC88;&#xD638;&#xB97C; &#xBCF4;&#xB0B4;&#xB4DC;&#xB9B4;&#xAC8C;&#xC694;.</p>
+          {% if error %}<p class="subcopy" style="color:#d15b45;">{{ error }}</p>{% endif %}
+          <label class="line-input">
+            <span>&#x260E;</span>
+            <input name="phone_number" inputmode="numeric" placeholder="010-1234-5678" value="{{ phone_number|default:'' }}" required />
+          </label>
+          <button class="main-button" type="submit">&#xC778;&#xC99D;&#xBC88;&#xD638; &#xBC1B;&#xAE30;</button>
+          <a class="existing-account" href="{% url 'accounts:login' %}">&#xC774;&#xBBF8; &#xACC4;&#xC815;&#xC774; &#xC874;&#xC7AC;&#xD569;&#xB2C8;&#xB2E4;</a>
+          <aside class="notice">
+            <strong>&#xC548;&#xB0B4;&#xC0AC;&#xD56D;</strong>
+            <p>&#xAC19;&#xC740; &#xB3D9;&#xB124; &#xC0AC;&#xB78C;&#xB4E4;&#xACFC; &#xC548;&#xC804;&#xD558;&#xAC8C; &#xAC70;&#xB798;&#xD560; &#xC218; &#xC788;&#xB3C4;&#xB85D;<br />&#xC804;&#xD654;&#xBC88;&#xD638; &#xC778;&#xC99D; &#xD6C4; &#xC774;&#xC6A9;&#xC774; &#xAC00;&#xB2A5;&#xD569;&#xB2C8;&#xB2E4;.</p>
+          </aside>
+        </form>
+      </main>
+    </div>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
+</html>
