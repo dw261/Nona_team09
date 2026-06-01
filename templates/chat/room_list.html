@@ -44,8 +44,25 @@
       {% for room in rooms %}
         {% with post=room.group_post|default:room.sharing_post %}
           <a class="room" href="{% url 'chat:room' room.id %}">
-            {% if post.image %}
-              <img class="thumb" src="{{ post.image.url }}" alt="" />
+            {# 1. 공구(group_post) 채팅방인 경우 #}
+            {% if room.group_post %}
+              {# 역참조 이름인 groupImages에서 첫 번째 이미지(.first)를 가져옵니다 #}
+              {% if room.group_post.groupImages.exists %}
+                <img class="thumb" src="{{ room.group_post.groupImages.first.photo.url }}" alt="공구이미지" />
+              {% else %}
+                <div class="thumb">N</div>
+              {% endif %}
+
+            {# 2. 나눔(sharing_post) 채팅방인 경우 #}
+            {% elif room.sharing_post %}
+              {# 역참조 이름인 shareImage에서 첫 번째 이미지(.first)를 가져옵니다 #}
+              {% if room.sharing_post.shareImage.exists %}
+                <img class="thumb" src="{{ room.sharing_post.shareImage.first.photo.url }}" alt="나눔이미지" />
+              {% else %}
+                <div class="thumb">N</div>
+              {% endif %}
+
+            {# 3. 둘 다 없는 경우 예외 처리 #}
             {% else %}
               <div class="thumb">N</div>
             {% endif %}
