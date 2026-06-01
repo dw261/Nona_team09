@@ -1,0 +1,138 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { useRef, useState } from "react";
+import { ChevronLeft } from "lucide-react";
+
+export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "인증번호 입력" },
+      { name: "description", content: "인증번호를 입력해주세요" },
+    ],
+  }),
+  component: VerifyCodePage,
+});
+
+function VerifyCodePage() {
+  const [code, setCode] = useState<string[]>(Array(6).fill(""));
+  const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  const handleChange = (idx: number, value: string) => {
+    const digit = value.replace(/\D/g, "").slice(-1);
+    const next = [...code];
+    next[idx] = digit;
+    setCode(next);
+    if (digit && idx < 5) inputsRef.current[idx + 1]?.focus();
+  };
+
+  const handleKeyDown = (idx: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace" && !code[idx] && idx > 0) {
+      inputsRef.current[idx - 1]?.focus();
+    }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    e.preventDefault();
+    const next = Array(6).fill("");
+    for (let i = 0; i < pasted.length; i++) next[i] = pasted[i];
+    setCode(next);
+    inputsRef.current[Math.min(pasted.length, 5)]?.focus();
+  };
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-neutral-200 p-4">
+      {/* iPhone 16 frame: 393 x 852 */}
+      <div
+        className="relative overflow-hidden bg-black shadow-2xl"
+        style={{
+          width: 393,
+          height: 852,
+          borderRadius: 55,
+          padding: 12,
+        }}
+      >
+        {/* Screen */}
+        <div
+          className="relative h-full w-full overflow-hidden bg-white"
+          style={{ borderRadius: 44 }}
+        >
+          {/* Dynamic Island */}
+          <div
+            className="absolute left-1/2 z-20 -translate-x-1/2 bg-black"
+            style={{ top: 11, width: 126, height: 37, borderRadius: 20 }}
+          />
+
+          {/* Status bar */}
+          <div className="flex items-center justify-between px-8 pt-4 text-[15px] font-semibold text-black">
+            <span>12:00</span>
+            <span />
+          </div>
+
+          {/* Content */}
+          <div className="flex h-[calc(100%-60px)] flex-col px-6 pt-10">
+            {/* Top: back + progress */}
+            <div className="flex items-center gap-3">
+              <button className="text-neutral-700">
+                <ChevronLeft size={22} />
+              </button>
+              <div className="flex flex-1 items-center">
+                <div className="h-3 w-3 rounded-full bg-[#c5d49a]" />
+                <div className="h-px flex-1 bg-[#c5d49a]" />
+                <div className="h-4 w-4 rounded-full bg-[#a8bf6e]" />
+                <div className="h-px flex-1 bg-[#c5d49a]" />
+                <div className="h-3 w-3 rounded-full bg-[#c5d49a]" />
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="mt-10 text-center">
+              <h1 className="text-[20px] font-bold leading-snug text-neutral-800">
+                인증번호를
+                <br />
+                입력해주세요
+              </h1>
+              <p className="mt-4 text-[13px] text-neutral-500">
+                010-1234-5678로 인증번호를 보냈어요
+              </p>
+            </div>
+
+            {/* OTP inputs */}
+            <div className="mt-8 flex justify-between gap-2">
+              {code.map((c, i) => (
+                <input
+                  key={i}
+                  ref={(el) => {
+                    inputsRef.current[i] = el;
+                  }}
+                  value={c}
+                  onChange={(e) => handleChange(i, e.target.value)}
+                  onKeyDown={(e) => handleKeyDown(i, e)}
+                  onPaste={handlePaste}
+                  inputMode="numeric"
+                  maxLength={1}
+                  className="h-12 w-12 rounded-xl border-2 border-[#c5d49a] text-center text-lg font-semibold text-neutral-800 outline-none focus:border-[#a8bf6e]"
+                />
+              ))}
+            </div>
+
+            {/* Submit */}
+            <button
+              className="mt-6 w-full rounded-xl bg-[#b8cc8a] py-3.5 text-[14px] font-medium text-white transition active:opacity-80"
+            >
+              인증번호 받기
+            </button>
+
+            {/* Resend */}
+            <button className="mt-4 text-center text-[12px] text-neutral-500 underline">
+              30초 후 다시 보내기
+            </button>
+          </div>
+
+          {/* Home indicator */}
+          <div className="absolute bottom-2 left-1/2 h-[5px] w-[134px] -translate-x-1/2 rounded-full bg-black" />
+        </div>
+      </div>
+    </div>
+  );
+}
