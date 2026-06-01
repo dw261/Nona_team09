@@ -11,7 +11,7 @@
   <body>
     <div class="mobile-wrap">
       <header class="status-bar">
-        <span>12:00</span>
+        <span>--:--</span>
         <div class="status-icons">
           <span>▮</span><span>⌁</span><span>▭</span>
         </div>
@@ -32,11 +32,17 @@
               placeholder="상품 / 공구명 검색"
             />
      
-            <input type="hidden" name="sort" value="latest" />
+            <input type="hidden" name="sort" value="{{ sort|default:'latest' }}" />
+            {% if wish_only %}<input type="hidden" name="wish" value="1" />{% endif %}
 
             <button type="submit">⌕</button>
           </form>
-          <button class="alarm-btn" type="button">♡</button>
+          <a
+            class="alarm-btn {% if wish_only %}active{% endif %}"
+            href="{{ wish_toggle_url }}"
+            aria-label="{% if wish_only %}전체 나눔 보기{% else %}찜한 나눔만 보기{% endif %}"
+            title="{% if wish_only %}전체 나눔 보기{% else %}찜한 나눔만 보기{% endif %}"
+          >{% if wish_only %}♥{% else %}♡{% endif %}</a>
         </section>
 
         <section class="logo-area">
@@ -92,6 +98,8 @@
               type="button"
               onclick="event.stopPropagation()"
               data-url="{% url 'posts:sharing_wish_toggle' share.id %}"
+              data-login-url="{% url 'accounts:login' %}"
+              {% if request.user.is_authenticated %}data-authenticated="true"{% endif %}
             >
                 {% if share.id in wished_ids %}
                     ♥
@@ -157,5 +165,6 @@
     </div>
 
     <script src="{% static 'post/js/nona.js' %}"></script>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
   </body>
 </html>

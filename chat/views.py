@@ -42,6 +42,33 @@ def get_room_for_request_user(request, room_id):
     return room
 
 
+def get_room_participants(room):
+    post = room.group_post or room.sharing_post
+    if post is None:
+        return []
+
+    users = [post.host]
+    if room.group_post_id:
+        participants = (
+            post.groupsParticipants
+            .filter(status__in=['pending', 'approved'])
+            .select_related('user')
+        )
+    else:
+        participants = (
+            post.participants
+            .filter(status__in=['pending', 'approved'])
+            .select_related('user')
+        )
+
+    seen_ids = {post.host_id}
+    for participant in participants:
+        if participant.user_id not in seen_ids:
+            users.append(participant.user)
+            seen_ids.add(participant.user_id)
+    return users
+
+
 @login_required
 def room_list(request):
     current_filter = request.GET.get('filter', 'all')
@@ -74,9 +101,11 @@ def room_list(request):
 def room_detail(request, room_id):
     room = get_room_for_request_user(request, room_id)
     messages = room.messages.select_related('user').order_by('timestamp')
+    participants = get_room_participants(room)
     return render(request, 'chat/room_detail.html', {
         'room': room,
         'messages': messages,
+        'participants': participants,
     })
 
 
@@ -96,10 +125,17 @@ def confirm_purchase(request, room_id):
         post.status = 'done'
         post.save(update_fields=['status', 'updated_at'])
 
+        final_price = request.POST.get('final_price', '').strip().replace(',', '')
+        message_content = '거래가 확정되었습니다.'
+        if final_price.isdigit() and room.group_post_id:
+            participant_count = max(len(get_room_participants(room)), 1)
+            per_price = int(final_price) // participant_count
+            message_content = f'거래가 확정되었습니다. 총 {int(final_price):,}원, 1인당 {per_price:,}원입니다.'
+
         Message.objects.create(
             room=room,
             user=request.user,
-            content='\uac70\ub798\uac00 \ud655\uc815\ub418\uc5c8\uc2b5\ub2c8\ub2e4.',
+            content=message_content,
         )
 
     return JsonResponse({

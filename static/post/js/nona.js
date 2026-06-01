@@ -117,38 +117,50 @@ document.querySelectorAll(".heart-btn").forEach((button) => {
 
     const iconTarget = button.querySelector(".heart-icon") || button;
     const countTarget = button.querySelector(".heart-count");
+    const wasActive = button.classList.contains("active");
+    const previousCount = countTarget ? Number(countTarget.textContent || 0) : null;
 
-    button.classList.toggle("active");
-    iconTarget.textContent = button.classList.contains("active") ? "♥" : "♡";
+    function setHeartState(wished) {
+      button.classList.toggle("active", wished);
+      iconTarget.textContent = wished ? "♥" : "♡";
+    }
+
+    setHeartState(!wasActive);
 
     if (countTarget) {
-      const currentCount = Number(countTarget.textContent || 0);
-      countTarget.textContent = button.classList.contains("active")
-        ? currentCount + 1
-        : Math.max(currentCount - 1, 0);
+      countTarget.textContent = !wasActive
+        ? previousCount + 1
+        : Math.max(previousCount - 1, 0);
     }
 
     const url = button.dataset.url;
     if (!url) return;
 
     try {
-      await fetch(url, {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "X-CSRFToken": getCookie("csrftoken"),
           "X-Requested-With": "XMLHttpRequest",
         },
       });
-    } catch (error) {
-      button.classList.toggle("active");
-      iconTarget.textContent = button.classList.contains("active") ? "♥" : "♡";
-
-      if (countTarget) {
-        const currentCount = Number(countTarget.textContent || 0);
-        countTarget.textContent = button.classList.contains("active")
-          ? currentCount + 1
-          : Math.max(currentCount - 1, 0);
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || "찜 처리에 실패했습니다.");
       }
+
+      setHeartState(Boolean(data.wished));
+      if (countTarget) {
+        countTarget.textContent = data.wished
+          ? previousCount + 1
+          : Math.max(previousCount - 1, 0);
+      }
+    } catch (error) {
+      setHeartState(wasActive);
+      if (countTarget) {
+        countTarget.textContent = previousCount;
+      }
+      alert(error.message || "찜 처리에 실패했습니다.");
     }
   });
 });

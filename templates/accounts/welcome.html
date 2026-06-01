@@ -1,0 +1,62 @@
+{% load static %}
+
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>nona - welcome</title>
+    <link rel="stylesheet" href="{% static 'post/css/nona.css' %}" />
+    <style>
+      .onboarding-stage { min-height: 100vh; display: grid; justify-content: center; align-content: start; background: #fff; }
+      .onboarding-frame { position: relative; width: 310px; min-height: 665px; overflow: hidden; background: #fdfdfb; }
+      .onboarding-status { display: flex; align-items: center; justify-content: space-between; height: 59px; padding: 20px 23px 0 38px; color: #1e2528; font-size: 14px; font-weight: 800; }
+      .onboarding-icons { display: flex; gap: 9px; }
+      .welcome-screen { min-height: 606px; padding: 0 18px 34px; text-align: center; }
+      .nona-logo { position: relative; display: inline-flex; align-items: center; margin-top: 52px; height: 38px; font-size: 43px; font-weight: 900; letter-spacing: -4px; line-height: 1; }
+      .nona-logo span:nth-child(1), .nona-logo span:nth-child(3) { color: #b3c476; }
+      .nona-logo span:nth-child(2), .nona-logo span:nth-child(4) { color: #ffa42b; }
+      .nona-logo i { position: absolute; right: -1px; top: -10px; width: 20px; height: 11px; border-radius: 100% 0; background: #85974d; transform: rotate(-38deg); }
+      .welcome-screen h1 { margin: 22px 0 0; color: #515940; font-size: 18px; font-weight: 850; line-height: 1.43; letter-spacing: 0; }
+      .welcome-screen p { color: #747b5d; font-size: 11px; font-weight: 500; line-height: 1.55; letter-spacing: 0; }
+      .welcome-copy { margin: 12px 0 17px; }
+      .welcome-art { position: relative; width: 280px; height: 236px; margin: 8px auto 0; border-radius: 4px; background: linear-gradient(#eeeeeb 0 24px, #f8f8f5 24px); overflow: hidden; }
+      .welcome-art::before { content: ""; position: absolute; inset: 38px 18px 38px; background: repeating-linear-gradient(75deg, #fff 0 16px, #f0f0ec 16px 28px); }
+      .person { position: absolute; bottom: 18px; width: 58px; height: 120px; border-radius: 30px 30px 8px 8px; background: #ffad45; }
+      .person::before { content: ""; position: absolute; top: -20px; left: 14px; width: 30px; height: 30px; border-radius: 50%; background: #ffad45; box-shadow: 0 -8px 0 4px #26363b; }
+      .person::after { content: ""; position: absolute; left: -10px; top: 34px; width: 78px; height: 50px; border-radius: 8px; background: #a8ba70; transform: rotate(8deg); }
+      .p1 { left: 44px; background: #26363b; }
+      .p2 { left: 126px; height: 132px; }
+      .p3 { right: 42px; background: #26363b; }
+      .onboarding-button { display: flex; align-items: center; justify-content: center; width: 250px; height: 42px; margin: 18px auto 0; border: 0; border-radius: 999px; color: #515940; background: #b3c476; font-size: 12px; font-weight: 750; text-decoration: none; }
+      .terms { margin: 18px 0 0; text-decoration: underline; text-underline-offset: 2px; }
+      @media (max-width: 420px) { .onboarding-frame { width: 100vw; min-height: 100vh; } }
+    </style>
+  </head>
+  <body>
+    <div class="onboarding-stage">
+      <main class="onboarding-frame">
+        <div class="onboarding-status">
+          <strong>--:--</strong>
+          <div class="onboarding-icons"><span>|</span><span>&#x2301;</span><span>&#x25AD;</span></div>
+        </div>
+
+        <section class="welcome-screen">
+          <div class="nona-logo" aria-label="nona">
+            <span>n</span><span>o</span><span>n</span><span>a</span><i></i>
+          </div>
+          <h1>&#xD63C;&#xC790;&#xBCF4;&#xB2E4; &#xAC00;&#xBCBC;&#xC6B4; &#xC18C;&#xBE44;,<br />&#xAC00;&#xAE4C;&#xC6B4; &#xB3D9;&#xB124;&#xC640; &#xD568;&#xAED8; &#xC2DC;&#xC791;&#xD574;&#xBCF4;&#xC138;&#xC694;.</h1>
+          <p class="welcome-copy">&#xADFC;&#xCC98; &#xC0AC;&#xB78C;&#xB4E4;&#xACFC; &#xD544;&#xC694;&#xD55C; &#xBB3C;&#xAC74;&#xC744; &#xD568;&#xAED8; &#xAD6C;&#xB9E4;&#xD558;&#xACE0;<br />&#xB0A8;&#xB294; &#xC18C;&#xBE44;&#xB97C; &#xC904;&#xC5EC;&#xBCF4;&#xC138;&#xC694;.</p>
+          <div class="welcome-art" aria-hidden="true">
+            <span class="person p1"></span>
+            <span class="person p2"></span>
+            <span class="person p3"></span>
+          </div>
+          <a class="onboarding-button" href="{% url 'accounts:phone' %}">&#xC804;&#xD654;&#xBC88;&#xD638;&#xB85C; &#xC2DC;&#xC791;&#xD558;&#xAE30;</a>
+          <p class="terms">&#xB85C;&#xADF8;&#xC778; &#xD6C4; Nona&#xC758; &#xC774;&#xC6A9;&#xC57D;&#xAD00; &#xBC0F; &#xAC1C;&#xC778;&#xC815;&#xBCF4; &#xCC98;&#xB9AC;&#xBC29;&#xCE68;&#xC5D0;<br />&#xB3D9;&#xC758;&#xD558;&#xB294; &#xAC83;&#xC73C;&#xB85C; &#xAC04;&#xC8FC;&#xB429;&#xB2C8;&#xB2E4;.</p>
+        </section>
+      </main>
+    </div>
+    <script src="{% static 'post/js/status-time.js' %}"></script>
+  </body>
+</html>

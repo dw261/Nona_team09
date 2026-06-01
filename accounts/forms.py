@@ -52,11 +52,17 @@ class SignupForm(forms.Form):
             username=phone_number,
             password=password,
         )
-        Profile.objects.create(
+        profile, created = Profile.objects.get_or_create(
             user=user,
-            phone_number=phone_number,
-            nickname=nickname,
+            defaults={
+                'phone_number': phone_number,
+                'nickname': nickname,
+            },
         )
+        if not created:
+            profile.phone_number = phone_number
+            profile.nickname = nickname
+            profile.save(update_fields=['phone_number', 'nickname', 'updated_at'])
         return user
 
 

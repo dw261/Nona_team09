@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { ChevronLeft, MapPin, Phone, UserRound } from 'lucide-react';
 import './styles.css';
@@ -6,9 +6,23 @@ import './styles.css';
 const screens = ['welcome', 'phone', 'code', 'nickname', 'location', 'complete'];
 
 function StatusBar() {
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+  });
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      const now = new Date();
+      setTime(`${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`);
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, []);
+
   return (
     <div className="status-bar" aria-hidden="true">
-      <strong>12:00</strong>
+      <strong>{time}</strong>
       <div className="status-icons">
         <span className="signal"><i /><i /><i /></span>
         <span className="wifi" />
